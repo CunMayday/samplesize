@@ -1,391 +1,599 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>A/B Testing Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div id="root"></div>
 
-const ABTestingDashboard = () => {
-  const [scenario, setScenario] = useState('website');
-  const [groupASize, setGroupASize] = useState(1000);
-  const [groupBSize, setGroupBSize] = useState(1000);
-  const [groupARate, setGroupARate] = useState(0.12);
-  const [groupBRate, setGroupBRate] = useState(0.15);
-  const [significanceLevel, setSignificanceLevel] = useState(0.05);
-  const [results, setResults] = useState(null);
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+      const {
+        BarChart,
+        Bar,
+        XAxis,
+        YAxis,
+        CartesianGrid,
+        Tooltip,
+        ResponsiveContainer,
+      } = Recharts;
 
-  const scenarios = {
-    website: {
-      title: "Website Conversion Rate Test",
-      description: "Testing if a new website design improves conversion rates",
-      metric: "Conversion Rate",
-      groupALabel: "Original Design",
-      groupBLabel: "New Design"
-    },
-    email: {
-      title: "Email Marketing Campaign Test",
-      description: "Testing if a new email subject line improves open rates",
-      metric: "Open Rate",
-      groupALabel: "Current Subject",
-      groupBLabel: "New Subject"
-    },
-    app: {
-      title: "Mobile App Feature Test",
-      description: "Testing if a new button color increases click-through rates",
-      metric: "Click-through Rate",
-      groupALabel: "Blue Button",
-      groupBLabel: "Red Button"
-    }
-  };
+      const ABTestingDashboard = () => {
+        const [scenario, setScenario] = useState("website");
+        const [groupASize, setGroupASize] = useState(1000);
+        const [groupBSize, setGroupBSize] = useState(1000);
+        const [groupARate, setGroupARate] = useState(0.12);
+        const [groupBRate, setGroupBRate] = useState(0.15);
+        const [significanceLevel, setSignificanceLevel] = useState(0.05);
+        const [results, setResults] = useState(null);
 
-  const calculateResults = () => {
-    // Convert rates to counts
-    const groupASuccesses = Math.round(groupASize * groupARate);
-    const groupBSuccesses = Math.round(groupBSize * groupBRate);
-    
-    // Calculate proportions
-    const p1 = groupASuccesses / groupASize;
-    const p2 = groupBSuccesses / groupBSize;
-    
-    // Pooled proportion for two-proportion z-test
-    const pooledP = (groupASuccesses + groupBSuccesses) / (groupASize + groupBSize);
-    
-    // Standard error
-    const se = Math.sqrt(pooledP * (1 - pooledP) * (1/groupASize + 1/groupBSize));
-    
-    // Z-statistic
-    const zStat = (p2 - p1) / se;
-    
-    // P-value (two-tailed test)
-    const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
-    
-    // Effect size (difference in proportions)
-    const effectSize = p2 - p1;
-    const effectSizePercent = (effectSize * 100);
-    
-    // Confidence interval for difference
-    const seDiff = Math.sqrt((p1 * (1 - p1)) / groupASize + (p2 * (1 - p2)) / groupBSize);
-    const criticalValue = 1.96; // 95% CI
-    const ciLower = effectSize - criticalValue * seDiff;
-    const ciUpper = effectSize + criticalValue * seDiff;
-    
-    // Statistical power estimation (simplified)
-    const power = calculatePower(groupASize, groupBSize, p1, p2, significanceLevel);
-    
-    return {
-      groupASuccesses,
-      groupBSuccesses,
-      p1,
-      p2,
-      zStat,
-      pValue,
-      effectSize,
-      effectSizePercent,
-      ciLower: ciLower * 100,
-      ciUpper: ciUpper * 100,
-      isSignificant: pValue < significanceLevel,
-      power,
-      pooledP,
-      se
-    };
-  };
+        const scenarios = {
+          website: {
+            title: "Website Conversion Rate Test",
+            description:
+              "Testing if a new website design improves conversion rates",
+            metric: "Conversion Rate",
+            groupALabel: "Original Design",
+            groupBLabel: "New Design",
+          },
+          email: {
+            title: "Email Marketing Campaign Test",
+            description:
+              "Testing if a new email subject line improves open rates",
+            metric: "Open Rate",
+            groupALabel: "Current Subject",
+            groupBLabel: "New Subject",
+          },
+          app: {
+            title: "Mobile App Feature Test",
+            description:
+              "Testing if a new button color increases click-through rates",
+            metric: "Click-through Rate",
+            groupALabel: "Blue Button",
+            groupBLabel: "Red Button",
+          },
+        };
 
-  // Normal CDF approximation
-  const normalCDF = (x) => {
-    return 0.5 * (1 + erf(x / Math.sqrt(2)));
-  };
+        const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
 
-  const erf = (x) => {
-    const a1 =  0.254829592;
-    const a2 = -0.284496736;
-    const a3 =  1.421413741;
-    const a4 = -1.453152027;
-    const a5 =  1.061405429;
-    const p  =  0.3275911;
-    
-    const sign = x >= 0 ? 1 : -1;
-    x = Math.abs(x);
-    
-    const t = 1.0 / (1.0 + p * x);
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-    
-    return sign * y;
-  };
+        const erf = (x) => {
+          const a1 = 0.254829592;
+          const a2 = -0.284496736;
+          const a3 = 1.421413741;
+          const a4 = -1.453152027;
+          const a5 = 1.061405429;
+          const p = 0.3275911;
 
-  const calculatePower = (n1, n2, p1, p2, alpha) => {
-    const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
-    const se1 = Math.sqrt(pooledP * (1 - pooledP) * (1/n1 + 1/n2));
-    const se2 = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2);
-    const criticalValue = 1.96; // for alpha = 0.05
-    const effectSize = Math.abs(p2 - p1);
-    const zBeta = (effectSize - criticalValue * se1) / se2;
-    return normalCDF(zBeta);
-  };
+          const sign = x >= 0 ? 1 : -1;
+          const absX = Math.abs(x);
+          const t = 1.0 / (1.0 + p * absX);
+          const y =
+            1.0 -
+            (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) *
+              t *
+              Math.exp(-absX * absX));
 
-  useEffect(() => {
-    setResults(calculateResults());
-  }, [scenario, groupASize, groupBSize, groupARate, groupBRate, significanceLevel]);
+          return sign * y;
+        };
 
-  const chartData = [
-    {
-      name: scenarios[scenario].groupALabel,
-      rate: (groupARate * 100).toFixed(2),
-      count: Math.round(groupASize * groupARate),
-      total: groupASize
-    },
-    {
-      name: scenarios[scenario].groupBLabel,
-      rate: (groupBRate * 100).toFixed(2),
-      count: Math.round(groupBSize * groupBRate),
-      total: groupBSize
-    }
-  ];
+        const calculatePower = (n1, n2, p1, p2) => {
+          const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
+          const se1 = Math.sqrt(
+            pooledP * (1 - pooledP) * (1 / n1 + 1 / n2)
+          );
+          const se2 = Math.sqrt(
+            (p1 * (1 - p1)) / n1 + (p2 * (1 - p2)) / n2
+          );
+          const criticalValue = 1.96; // for alpha = 0.05
+          const effectSize = Math.abs(p2 - p1);
+          const zBeta = (effectSize - criticalValue * se1) / se2;
+          return normalCDF(zBeta);
+        };
 
-  const getSignificanceColor = (pValue) => {
-    if (pValue < 0.001) return 'text-green-700 bg-green-100';
-    if (pValue < 0.01) return 'text-green-600 bg-green-50';
-    if (pValue < 0.05) return 'text-yellow-700 bg-yellow-100';
-    return 'text-red-600 bg-red-50';
-  };
+        const calculateResults = () => {
+          const groupASuccesses = Math.round(groupASize * groupARate);
+          const groupBSuccesses = Math.round(groupBSize * groupBRate);
 
-  const getInterpretation = () => {
-    if (!results) return '';
-    
-    const { pValue, isSignificant, effectSizePercent } = results;
-    
-    if (isSignificant) {
-      return `🎉 Statistically Significant! The difference of ${effectSizePercent.toFixed(2)}% is unlikely due to chance alone (p = ${pValue.toFixed(4)}). We can reject the null hypothesis.`;
-    } else {
-      return `❌ Not Statistically Significant. The observed difference of ${effectSizePercent.toFixed(2)}% could reasonably be due to chance (p = ${pValue.toFixed(4)}). We fail to reject the null hypothesis.`;
-    }
-  };
+          const p1 = groupASuccesses / groupASize;
+          const p2 = groupBSuccesses / groupBSize;
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">A/B Testing Dashboard</h1>
-        <p className="text-gray-600">Interactive statistical learning tool for hypothesis testing</p>
-      </div>
+          const pooledP =
+            (groupASuccesses + groupBSuccesses) /
+            (groupASize + groupBSize);
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* LEFT COLUMN - INPUTS */}
-        <div className="space-y-6">
-          {/* Scenario Selection */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Test Configuration</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Test Scenario</label>
-                <select 
-                  value={scenario} 
-                  onChange={(e) => setScenario(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  {Object.entries(scenarios).map(([key, value]) => (
-                    <option key={key} value={key}>{value.title}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Significance Level (α)</label>
-                <select 
-                  value={significanceLevel} 
-                  onChange={(e) => setSignificanceLevel(parseFloat(e.target.value))}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={0.10}>0.10 (10%)</option>
-                  <option value={0.05}>0.05 (5%)</option>
-                  <option value={0.01}>0.01 (1%)</option>
-                </select>
-              </div>
+          const se = Math.sqrt(
+            pooledP * (1 - pooledP) * (1 / groupASize + 1 / groupBSize)
+          );
 
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-800">{scenarios[scenario].title}</h3>
-                <p className="text-blue-700 text-sm">{scenarios[scenario].description}</p>
-              </div>
+          const zStat = (p2 - p1) / se;
+          const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
+
+          const effectSize = p2 - p1;
+          const effectSizePercent = effectSize * 100;
+
+          const seDiff = Math.sqrt(
+            (p1 * (1 - p1)) / groupASize +
+              (p2 * (1 - p2)) / groupBSize
+          );
+          const criticalValue = 1.96; // 95% CI
+          const ciLower = effectSize - criticalValue * seDiff;
+          const ciUpper = effectSize + criticalValue * seDiff;
+
+          const power = calculatePower(
+            groupASize,
+            groupBSize,
+            p1,
+            p2,
+            significanceLevel
+          );
+
+          return {
+            groupASuccesses,
+            groupBSuccesses,
+            p1,
+            p2,
+            zStat,
+            pValue,
+            effectSize,
+            effectSizePercent,
+            ciLower: ciLower * 100,
+            ciUpper: ciUpper * 100,
+            isSignificant: pValue < significanceLevel,
+            power,
+            pooledP,
+            se,
+          };
+        };
+
+        useEffect(() => {
+          setResults(calculateResults());
+        }, [
+          scenario,
+          groupASize,
+          groupBSize,
+          groupARate,
+          groupBRate,
+          significanceLevel,
+        ]);
+
+        const chartData = [
+          {
+            name: scenarios[scenario].groupALabel,
+            rate: parseFloat((groupARate * 100).toFixed(2)),
+            count: Math.round(groupASize * groupARate),
+            total: groupASize,
+          },
+          {
+            name: scenarios[scenario].groupBLabel,
+            rate: parseFloat((groupBRate * 100).toFixed(2)),
+            count: Math.round(groupBSize * groupBRate),
+            total: groupBSize,
+          },
+        ];
+
+        const getSignificanceColor = (pValue) => {
+          if (pValue < 0.001)
+            return "text-green-700 bg-green-100";
+          if (pValue < 0.01)
+            return "text-green-600 bg-green-50";
+          if (pValue < 0.05)
+            return "text-yellow-700 bg-yellow-100";
+          return "text-red-600 bg-red-50";
+        };
+
+        const getInterpretation = () => {
+          if (!results) return "";
+          const { pValue, isSignificant, effectSizePercent } =
+            results;
+
+          if (isSignificant) {
+            return `🎉 Statistically Significant! The difference of ${effectSizePercent.toFixed(
+              2
+            )}% is unlikely due to chance alone (p = ${pValue.toFixed(
+              4
+            )}). We can reject the null hypothesis.`;
+          }
+          return `❌ Not Statistically Significant. The observed difference of ${effectSizePercent.toFixed(
+            2
+          )}% could reasonably be due to chance (p = ${pValue.toFixed(
+            4
+          )}). We fail to reject the null hypothesis.`;
+        };
+
+        return (
+          <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                A/B Testing Dashboard
+              </h1>
+              <p className="text-gray-600">
+                Interactive statistical learning tool for hypothesis
+                testing
+              </p>
             </div>
-          </div>
 
-          {/* Group A Inputs */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-blue-600">Group A: {scenarios[scenario].groupALabel}</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
-                <input 
-                  type="number" 
-                  value={groupASize} 
-                  onChange={(e) => setGroupASize(parseInt(e.target.value) || 0)}
-                  min="50"
-                  max="10000"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{scenarios[scenario].metric} (%)</label>
-                <input 
-                  type="number" 
-                  value={(groupARate * 100).toFixed(1)} 
-                  onChange={(e) => setGroupARate(parseFloat(e.target.value) / 100 || 0)}
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="bg-blue-50 p-3 rounded">
-                <p className="text-sm text-blue-700">
-                  <strong>Conversions:</strong> {Math.round(groupASize * groupARate)} out of {groupASize}
-                </p>
-                <p className="text-sm text-blue-700">
-                  <strong>Rate:</strong> {(groupARate * 100).toFixed(2)}%
-                </p>
-              </div>
-            </div>
-          </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Test Configuration
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Test Scenario
+                      </label>
+                      <select
+                        value={scenario}
+                        onChange={(e) => setScenario(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Object.entries(scenarios).map(
+                          ([key, value]) => (
+                            <option key={key} value={key}>
+                              {value.title}
+                            </option>
+                          )
+                        )}
+                      </select>
+                    </div>
 
-          {/* Group B Inputs */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-green-600">Group B: {scenarios[scenario].groupBLabel}</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
-                <input 
-                  type="number" 
-                  value={groupBSize} 
-                  onChange={(e) => setGroupBSize(parseInt(e.target.value) || 0)}
-                  min="50"
-                  max="10000"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{scenarios[scenario].metric} (%)</label>
-                <input 
-                  type="number" 
-                  value={(groupBRate * 100).toFixed(1)} 
-                  onChange={(e) => setGroupBRate(parseFloat(e.target.value) / 100 || 0)}
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div className="bg-green-50 p-3 rounded">
-                <p className="text-sm text-green-700">
-                  <strong>Conversions:</strong> {Math.round(groupBSize * groupBRate)} out of {groupBSize}
-                </p>
-                <p className="text-sm text-green-700">
-                  <strong>Rate:</strong> {(groupBRate * 100).toFixed(2)}%
-                </p>
-              </div>
-            </div>
-          </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Significance Level (α)
+                      </label>
+                      <select
+                        value={significanceLevel}
+                        onChange={(e) =>
+                          setSignificanceLevel(
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value={0.1}>0.10 (10%)</option>
+                        <option value={0.05}>0.05 (5%)</option>
+                        <option value={0.01}>0.01 (1%)</option>
+                      </select>
+                    </div>
 
-          {/* Learning Notes */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Learning Notes</h2>
-            <div className="space-y-3 text-sm text-gray-700">
-              <p><strong>P-Value:</strong> The probability of observing this difference (or more extreme) if there's truly no difference between groups.</p>
-              <p><strong>Z-Statistic:</strong> Measures how many standard errors the observed difference is from zero.</p>
-              <p><strong>Effect Size:</strong> The actual difference between groups, regardless of statistical significance.</p>
-              <p><strong>Statistical Power:</strong> The probability of detecting a true difference when it exists.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN - RESULTS */}
-        <div className="space-y-6">
-          {results && (
-            <>
-              {/* Visualization */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Visualization</h2>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value, name) => [
-                          name === 'rate' ? `${value}%` : value,
-                          name === 'rate' ? 'Conversion Rate' : 'Count'
-                        ]}
-                      />
-                      <Bar dataKey="rate" fill="#3B82F6" name="rate" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              {/* Test Results */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Test Results</h2>
-                
-                <div className={`p-4 rounded-lg mb-6 ${results.isSignificant ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-                  <p className="font-medium text-lg">{getInterpretation()}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-gray-50 p-4 rounded-lg text-center">
-                    <h3 className="font-semibold text-gray-700 mb-1">Z-Statistic</h3>
-                    <p className="text-3xl font-bold text-blue-600">{results.zStat.toFixed(3)}</p>
-                  </div>
-                  
-                  <div className={`p-4 rounded-lg text-center ${getSignificanceColor(results.pValue)}`}>
-                    <h3 className="font-semibold mb-1">P-Value</h3>
-                    <p className="text-3xl font-bold">{results.pValue.toFixed(4)}</p>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg text-center">
-                    <h3 className="font-semibold text-gray-700 mb-1">Effect Size</h3>
-                    <p className="text-3xl font-bold text-purple-600">{results.effectSizePercent.toFixed(2)}%</p>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg text-center">
-                    <h3 className="font-semibold text-gray-700 mb-1">Statistical Power</h3>
-                    <p className="text-3xl font-bold text-orange-600">{(results.power * 100).toFixed(1)}%</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Statistical Details */}
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Statistical Details</h2>
-                
-                <div className="space-y-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-blue-800 mb-2">Hypothesis Test Setup</h3>
-                    <p className="text-blue-700 text-sm"><strong>H₀:</strong> p₁ = p₂ (No difference between groups)</p>
-                    <p className="text-blue-700 text-sm"><strong>H₁:</strong> p₁ ≠ p₂ (There is a difference between groups)</p>
-                    <p className="text-blue-700 text-sm"><strong>Significance Level:</strong> α = {significanceLevel}</p>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-gray-700 mb-2">Confidence Interval (95%)</h3>
-                    <p className="text-gray-700 text-sm">
-                      The true difference is likely between <strong>{results.ciLower.toFixed(2)}%</strong> and <strong>{results.ciUpper.toFixed(2)}%</strong>
-                    </p>
-                    {results.ciLower <= 0 && results.ciUpper >= 0 && (
-                      <p className="text-orange-600 mt-1 text-sm">⚠️ The confidence interval includes 0, suggesting no significant difference.</p>
-                    )}
-                  </div>
-
-                  <div className="bg-yellow-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-yellow-800 mb-2">Key Metrics</h3>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <p className="text-yellow-700"><strong>Pooled Proportion:</strong> {(results.pooledP * 100).toFixed(2)}%</p>
-                      <p className="text-yellow-700"><strong>Standard Error:</strong> {results.se.toFixed(4)}</p>
-                      <p className="text-yellow-700"><strong>Group A Rate:</strong> {(results.p1 * 100).toFixed(2)}%</p>
-                      <p className="text-yellow-700"><strong>Group B Rate:</strong> {(results.p2 * 100).toFixed(2)}%</p>
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-blue-800">
+                        {scenarios[scenario].title}
+                      </h3>
+                      <p className="text-blue-700 text-sm">
+                        {scenarios[scenario].description}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
-export default ABTestingDashboard;
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-blue-600">
+                    Group A: {scenarios[scenario].groupALabel}
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sample Size
+                      </label>
+                      <input
+                        type="number"
+                        value={groupASize}
+                        onChange={(e) =>
+                          setGroupASize(
+                            parseInt(e.target.value, 10) || 0
+                          )
+                        }
+                        min="50"
+                        max="10000"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {scenarios[scenario].metric} (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={(groupARate * 100).toFixed(1)}
+                        onChange={(e) =>
+                          setGroupARate(
+                            parseFloat(e.target.value) / 100 || 0
+                          )
+                        }
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded">
+                      <p className="text-sm text-blue-700">
+                        <strong>Conversions:</strong>{" "}
+                        {Math.round(groupASize * groupARate)} out of{" "}
+                        {groupASize}
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        <strong>Rate:</strong>{" "}
+                        {(groupARate * 100).toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-green-600">
+                    Group B: {scenarios[scenario].groupBLabel}
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Sample Size
+                      </label>
+                      <input
+                        type="number"
+                        value={groupBSize}
+                        onChange={(e) =>
+                          setGroupBSize(
+                            parseInt(e.target.value, 10) || 0
+                          )
+                        }
+                        min="50"
+                        max="10000"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {scenarios[scenario].metric} (%)
+                      </label>
+                      <input
+                        type="number"
+                        value={(groupBRate * 100).toFixed(1)}
+                        onChange={(e) =>
+                          setGroupBRate(
+                            parseFloat(e.target.value) / 100 || 0
+                          )
+                        }
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                      />
+                    </div>
+                    <div className="bg-green-50 p-3 rounded">
+                      <p className="text-sm text-green-700">
+                        <strong>Conversions:</strong>{" "}
+                        {Math.round(groupBSize * groupBRate)} out of{" "}
+                        {groupBSize}
+                      </p>
+                      <p className="text-sm text-green-700">
+                        <strong>Rate:</strong>{" "}
+                        {(groupBRate * 100).toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-semibold mb-4">
+                    Learning Notes
+                  </h2>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <p>
+                      <strong>P-Value:</strong> The probability of
+                      observing this difference (or more extreme) if
+                      there's truly no difference between groups.
+                    </p>
+                    <p>
+                      <strong>Z-Statistic:</strong> Measures how many
+                      standard errors the observed difference is from
+                      zero.
+                    </p>
+                    <p>
+                      <strong>Effect Size:</strong> The actual
+                      difference between groups, regardless of
+                      statistical significance.
+                    </p>
+                    <p>
+                      <strong>Statistical Power:</strong> The
+                      probability of detecting a true difference when
+                      it exists.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {results && (
+                  <>
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Visualization
+                      </h2>
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis />
+                            <Tooltip
+                              formatter={(value, name) => [
+                                name === "rate"
+                                  ? `${value}%`
+                                  : value,
+                                name === "rate"
+                                  ? "Conversion Rate"
+                                  : "Count",
+                              ]}
+                            />
+                            <Bar
+                              dataKey="rate"
+                              fill="#3B82F6"
+                              name="rate"
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Test Results
+                      </h2>
+
+                      <div
+                        className={`p-4 rounded-lg mb-6 ${
+                          results.isSignificant
+                            ? "bg-green-50 border border-green-200"
+                            : "bg-red-50 border border-red-200"
+                        }`}
+                      >
+                        <p className="font-medium text-lg">
+                          {getInterpretation()}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="bg-gray-50 p-4 rounded-lg text-center">
+                          <h3 className="font-semibold text-gray-700 mb-1">
+                            Z-Statistic
+                          </h3>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {results.zStat.toFixed(3)}
+                          </p>
+                        </div>
+
+                        <div
+                          className={`p-4 rounded-lg text-center ${getSignificanceColor(
+                            results.pValue
+                          )}`}
+                        >
+                          <h3 className="font-semibold mb-1">P-Value</h3>
+                          <p className="text-3xl font-bold">
+                            {results.pValue.toFixed(4)}
+                          </p>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg text-center">
+                          <h3 className="font-semibold text-gray-700 mb-1">
+                            Effect Size
+                          </h3>
+                          <p className="text-3xl font-bold text-purple-600">
+                            {results.effectSizePercent.toFixed(2)}%
+                          </p>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg text-center">
+                          <h3 className="font-semibold text-gray-700 mb-1">
+                            Statistical Power
+                          </h3>
+                          <p className="text-3xl font-bold text-orange-600">
+                            {(results.power * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Statistical Details
+                      </h2>
+
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h3 className="font-semibold text-blue-800 mb-2">
+                            Hypothesis Test Setup
+                          </h3>
+                          <p className="text-blue-700 text-sm">
+                            <strong>H₀:</strong> p₁ = p₂ (No difference
+                            between groups)
+                          </p>
+                          <p className="text-blue-700 text-sm">
+                            <strong>H₁:</strong> p₁ ≠ p₂ (There is a
+                            difference between groups)
+                          </p>
+                          <p className="text-blue-700 text-sm">
+                            <strong>Significance Level:</strong> α ={" "}
+                            {significanceLevel}
+                          </p>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h3 className="font-semibold text-gray-700 mb-2">
+                            Confidence Interval (95%)
+                          </h3>
+                          <p className="text-gray-700 text-sm">
+                            The true difference is likely between{" "}
+                            <strong>
+                              {results.ciLower.toFixed(2)}%
+                            </strong>{" "}
+                            and{" "}
+                            <strong>
+                              {results.ciUpper.toFixed(2)}%
+                            </strong>
+                          </p>
+                          {results.ciLower <= 0 &&
+                            results.ciUpper >= 0 && (
+                              <p className="text-orange-600 mt-1 text-sm">
+                                ⚠️ The confidence interval includes 0,
+                                suggesting no significant difference.
+                              </p>
+                            )}
+                        </div>
+
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <h3 className="font-semibold text-yellow-800 mb-2">
+                            Key Metrics
+                          </h3>
+                          <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                            <p className="text-yellow-700">
+                              <strong>Pooled Proportion:</strong>{" "}
+                              {(results.pooledP * 100).toFixed(2)}%
+                            </p>
+                            <p className="text-yellow-700">
+                              <strong>Standard Error:</strong>{" "}
+                              {results.se.toFixed(4)}
+                            </p>
+                            <p className="text-yellow-700">
+                              <strong>Group A Rate:</strong>{" "}
+                              {(results.p1 * 100).toFixed(2)}%
+                            </p>
+                            <p className="text-yellow-700">
+                              <strong>Group B Rate:</strong>{" "}
+                              {(results.p2 * 100).toFixed(2)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<ABTestingDashboard />);
+    </script>
+  </body>
+</html>
