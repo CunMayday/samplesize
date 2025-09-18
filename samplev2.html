@@ -149,6 +149,44 @@
 
       const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
 
+        const computeTestMetrics = (n1, n2, p1, p2) => {
+          if (n1 <= 0 || n2 <= 0) {
+            return {
+              pValue: 1,
+              zStat: 0,
+              pooledP: 0,
+              se: 0,
+            };
+          }
+
+          const pooledP = (p1 * n1 + p2 * n2) / (n1 + n2);
+          const variance =
+            pooledP * (1 - pooledP) * (1 / n1 + 1 / n2);
+          const se = Math.sqrt(Math.max(variance, 0));
+
+          if (!Number.isFinite(se) || se === 0) {
+            return {
+              pValue: 1,
+              zStat: 0,
+              pooledP,
+              se: 0,
+            };
+          }
+
+          const zStat = (p2 - p1) / se;
+          const pValue = Math.min(
+            Math.max(2 * (1 - normalCDF(Math.abs(zStat))), 0),
+            1
+          );
+
+          return {
+            pValue,
+            zStat,
+            pooledP,
+            se,
+          };
+        };
+
         const calculatePower = (n1, n2, p1, p2) => {
           const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
           const se1 = Math.sqrt(
@@ -167,19 +205,15 @@
           const groupASuccesses = Math.round(groupASize * groupARate);
           const groupBSuccesses = Math.round(groupBSize * groupBRate);
 
-          const p1 = groupASuccesses / groupASize;
-          const p2 = groupBSuccesses / groupBSize;
+          const p1 = groupARate;
+          const p2 = groupBRate;
 
-          const pooledP =
-            (groupASuccesses + groupBSuccesses) /
-            (groupASize + groupBSize);
-
-          const se = Math.sqrt(
-            pooledP * (1 - pooledP) * (1 / groupASize + 1 / groupBSize)
+          const { pValue, zStat, pooledP, se } = computeTestMetrics(
+            groupASize,
+            groupBSize,
+            p1,
+            p2
           );
-
-          const zStat = (p2 - p1) / se;
-          const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
 
           const effectSize = p2 - p1;
           const effectSizePercent = effectSize * 100;
@@ -272,6 +306,269 @@
             4
           )}). We fail to reject the null hypothesis.`;
         };
+
+        const switchInsights = React.useMemo(() => {
+          if (!results) {
+            return { rate: null, sampleSize: null };
+          }
+
+          const currentSignificant = results.isSignificant;
+
+          const evaluateRate = (rate) => {
+            const metrics = computeTestMetrics(
+              groupASize,
+              groupBSize,
+              groupARate,
+              rate
+            );
+            return {
+              ...metrics,
+              rate,
+              isSignificant: metrics.pValue < significanceLevel,
+            };
+          };
+
+          const findRateThreshold = () => {
+            const startEvaluation = evaluateRate(groupBRate);
+            if (groupASize <= 0 || groupBSize <= 0) {
+              return null;
+            }
+
+            if (currentSignificant) {
+              if (Math.abs(groupBRate - groupARate) < 1e-6) {
+                return null;
+              }
+
+              if (groupBRate > groupARate) {
+                let low = groupARate;
+                let high = groupBRate;
+                const lowEval = evaluateRate(low);
+                const highEval = startEvaluation;
+
+                if (lowEval.isSignificant === highEval.isSignificant) {
+                  return null;
+                }
+
+                for (let i = 0; i < 60; i++) {
+                  const mid = (low + high) / 2;
+                  const midEval = evaluateRate(mid);
+                  if (midEval.isSignificant) {
+                    high = mid;
+                  } else {
+                    low = mid;
+                  }
+                }
+
+                const finalEval = evaluateRate(high);
+                return {
+                  direction: "decrease",
+                  targetRate: high,
+                  delta: high - groupBRate,
+                  ...finalEval,
+                };
+              }
+
+              if (groupBRate < groupARate) {
+                let low = groupBRate;
+                let high = groupARate;
+                const highEval = evaluateRate(high);
+                const lowEval = startEvaluation;
+
+                if (lowEval.isSignificant === highEval.isSignificant) {
+                  return null;
+                }
+
+                for (let i = 0; i < 60; i++) {
+                  const mid = (low + high) / 2;
+                  const midEval = evaluateRate(mid);
+                  if (midEval.isSignificant) {
+                    low = mid;
+                  } else {
+                    high = mid;
+                  }
+                }
+
+                const finalEval = evaluateRate(high);
+                return {
+                  direction: "increase",
+                  targetRate: high,
+                  delta: high - groupBRate,
+                  ...finalEval,
+                };
+              }
+
+              return null;
+            }
+
+            if (!currentSignificant) {
+              if (groupBRate >= groupARate) {
+                let low = groupBRate;
+                let high = 1;
+                let highEval = evaluateRate(high);
+
+                if (!highEval.isSignificant) {
+                  return null;
+                }
+
+                for (let i = 0; i < 60; i++) {
+                  const mid = (low + high) / 2;
+                  const midEval = evaluateRate(mid);
+                  if (midEval.isSignificant) {
+                    high = mid;
+                  } else {
+                    low = mid;
+                  }
+                }
+
+                const finalEval = evaluateRate(high);
+                return {
+                  direction: "increase",
+                  targetRate: high,
+                  delta: high - groupBRate,
+                  ...finalEval,
+                };
+              }
+
+              if (groupBRate < groupARate) {
+                let high = groupBRate;
+                let low = 0;
+                let lowEval = evaluateRate(low);
+
+                if (!lowEval.isSignificant) {
+                  return null;
+                }
+
+                for (let i = 0; i < 60; i++) {
+                  const mid = (low + high) / 2;
+                  const midEval = evaluateRate(mid);
+                  if (midEval.isSignificant) {
+                    high = mid;
+                  } else {
+                    low = mid;
+                  }
+                }
+
+                const finalEval = evaluateRate(high);
+                return {
+                  direction: "decrease",
+                  targetRate: high,
+                  delta: high - groupBRate,
+                  ...finalEval,
+                };
+              }
+            }
+
+            return null;
+          };
+
+          const evaluateScale = (scale) => {
+            const minSample = 2;
+            const adjustedN1 = Math.max(groupASize * scale, minSample);
+            const adjustedN2 = Math.max(groupBSize * scale, minSample);
+            const metrics = computeTestMetrics(
+              adjustedN1,
+              adjustedN2,
+              groupARate,
+              groupBRate
+            );
+
+            return {
+              ...metrics,
+              scale,
+              adjustedN1,
+              adjustedN2,
+              isSignificant: metrics.pValue < significanceLevel,
+            };
+          };
+
+          const findSampleSizeThreshold = () => {
+            const minScale = Math.min(
+              1,
+              Math.max(2 / groupASize, 2 / groupBSize)
+            );
+
+            const currentEval = evaluateScale(1);
+
+            if (currentSignificant) {
+              let low = minScale;
+              let high = 1;
+              const lowEval = evaluateScale(low);
+              const highEval = currentEval;
+
+              if (lowEval.isSignificant === highEval.isSignificant) {
+                return null;
+              }
+
+              for (let i = 0; i < 60; i++) {
+                const mid = (low + high) / 2;
+                const midEval = evaluateScale(mid);
+                if (midEval.isSignificant) {
+                  high = mid;
+                } else {
+                  low = mid;
+                }
+              }
+
+              const finalEval = evaluateScale(high);
+              return {
+                direction: "decrease",
+                ...finalEval,
+              };
+            }
+
+            if (!currentSignificant) {
+              let low = 1;
+              let high = 1;
+              let highEval = currentEval;
+              const maxScale = 1000;
+
+              while (!highEval.isSignificant && high < maxScale) {
+                high *= 2;
+                highEval = evaluateScale(high);
+                if (
+                  groupASize * high > 1_000_000 ||
+                  groupBSize * high > 1_000_000
+                ) {
+                  break;
+                }
+              }
+
+              if (!highEval.isSignificant) {
+                return null;
+              }
+
+              for (let i = 0; i < 60; i++) {
+                const mid = (low + high) / 2;
+                const midEval = evaluateScale(mid);
+                if (midEval.isSignificant) {
+                  high = mid;
+                } else {
+                  low = mid;
+                }
+              }
+
+              const finalEval = evaluateScale(high);
+              return {
+                direction: "increase",
+                ...finalEval,
+              };
+            }
+
+            return null;
+          };
+
+          return {
+            rate: findRateThreshold(),
+            sampleSize: findSampleSizeThreshold(),
+          };
+        }, [
+          results,
+          groupASize,
+          groupBSize,
+          groupARate,
+          groupBRate,
+          significanceLevel,
+        ]);
 
         return (
           <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
@@ -620,6 +917,105 @@
                               {(results.p2 * 100).toFixed(2)}%
                             </p>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <h2 className="text-xl font-semibold mb-4">
+                        Switching Threshold Insights
+                      </h2>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Discover how much you would need to adjust one
+                        factor while holding the other constant to
+                        flip the current conclusion of the test.
+                      </p>
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="border border-blue-100 rounded-lg p-4 bg-blue-50/50">
+                          <h3 className="font-semibold text-blue-800 mb-2">
+                            Adjust Group B Rate
+                          </h3>
+                          {switchInsights.rate ? (
+                            <div className="text-sm text-blue-700 space-y-2">
+                              <p>
+                                {switchInsights.rate.direction ===
+                                "increase"
+                                  ? "Increase"
+                                  : "Decrease"}{" "}
+                                Group B's rate to{" "}
+                                <strong>
+                                  {(switchInsights.rate.targetRate *
+                                    100).toFixed(2)}%
+                                </strong>{" "}
+                                to push the p-value to approximately{" "}
+                                <strong>
+                                  {switchInsights.rate.pValue.toFixed(4)}
+                                </strong>
+                                , causing the test to become{" "}
+                                {switchInsights.rate.isSignificant
+                                  ? "statistically significant."
+                                  : "not statistically significant."}
+                              </p>
+                              <p className="text-xs text-blue-600">
+                                Current rate: {(groupBRate * 100).toFixed(2)}%
+                                · Change of{" "}
+                                {(switchInsights.rate.delta * 100).toFixed(2)}%
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-blue-700">
+                              Unable to find a rate adjustment within the
+                              0%–100% range that would reverse the current
+                              conclusion.
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="border border-green-100 rounded-lg p-4 bg-green-50/50">
+                          <h3 className="font-semibold text-green-800 mb-2">
+                            Adjust Sample Sizes
+                          </h3>
+                          {switchInsights.sampleSize ? (
+                            <div className="text-sm text-green-700 space-y-2">
+                              <p>
+                                {switchInsights.sampleSize.direction ===
+                                "increase"
+                                  ? "Scale up"
+                                  : "Scale down"}{" "}
+                                the sample sizes to about{" "}
+                                <strong>
+                                  {Math.round(
+                                    switchInsights.sampleSize.adjustedN1
+                                  ).toLocaleString()}
+                                </strong>{" "}
+                                in Group A and{" "}
+                                <strong>
+                                  {Math.round(
+                                    switchInsights.sampleSize.adjustedN2
+                                  ).toLocaleString()}
+                                </strong>{" "}
+                                in Group B. This would yield a p-value of{" "}
+                                <strong>
+                                  {switchInsights.sampleSize.pValue.toFixed(
+                                    4
+                                  )}
+                                </strong>{" "}
+                                and flip the statistical conclusion.
+                              </p>
+                              <p className="text-xs text-green-600">
+                                Scale factor: ×
+                                {switchInsights.sampleSize.scale.toFixed(2)} ·
+                                Current sizes: {groupASize.toLocaleString()} vs
+                                {" "}
+                                {groupBSize.toLocaleString()}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-green-700">
+                              Unable to identify sample sizes within practical
+                              bounds that would reverse the current outcome.
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
