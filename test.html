@@ -12,6 +12,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <style>
+        :root {
+            /* Official Purdue Colors */
+            --purdue-campus-gold: #C28E0E;
+            --purdue-athletic-gold: #CEB888;
+            --purdue-black: #000000;
+            --purdue-gray: #9D968D;
+            --purdue-dark-gray: #373A36;
+            --purdue-white: #FFFFFF;
+            
+            /* Light variations for backgrounds */
+            --purdue-gold-light: #F5F1E8;
+            --purdue-gold-lighter: #FAF8F2;
+            --purdue-gray-light: #F5F4F3;
+        }
+        
         body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -19,28 +34,55 @@
                 sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background-color: var(--purdue-gray-light);
         }
+        
+        /* Custom Purdue-themed classes */
+        .bg-purdue-gold { background-color: var(--purdue-campus-gold); }
+        .bg-purdue-gold-light { background-color: var(--purdue-gold-light); }
+        .bg-purdue-gold-lighter { background-color: var(--purdue-gold-lighter); }
+        .bg-purdue-black { background-color: var(--purdue-black); }
+        .bg-purdue-gray { background-color: var(--purdue-gray); }
+        .bg-purdue-gray-light { background-color: var(--purdue-gray-light); }
+        
+        .text-purdue-gold { color: var(--purdue-campus-gold); }
+        .text-purdue-black { color: var(--purdue-black); }
+        .text-purdue-gray { color: var(--purdue-gray); }
+        .text-purdue-dark-gray { color: var(--purdue-dark-gray); }
+        
+        .border-purdue-gold { border-color: var(--purdue-campus-gold); }
+        .border-purdue-black { border-color: var(--purdue-black); }
+        .border-purdue-gray { border-color: var(--purdue-gray); }
+        
+        .ring-purdue-gold { --tw-ring-color: var(--purdue-campus-gold); }
+        .ring-purdue-black { --tw-ring-color: var(--purdue-black); }
+        
+        /* Success/Error states using Purdue colors */
+        .bg-purdue-success { background-color: var(--purdue-gold-light); border-color: var(--purdue-campus-gold); }
+        .bg-purdue-warning { background-color: var(--purdue-gold-lighter); border-color: var(--purdue-athletic-gold); }
+        .bg-purdue-error { background-color: var(--purdue-gray-light); border-color: var(--purdue-gray); }
     </style>
 </head>
 <body>
     <div id="root">
-        <div class="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+        <div class="p-6 max-w-7xl mx-auto min-h-screen">
             <!-- Header -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">A/B Testing Dashboard</h1>
-                <p class="text-gray-600">Interactive statistical learning tool for hypothesis testing</p>
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6 border-t-4 border-purdue-gold">
+                <h1 class="text-3xl font-bold text-purdue-black mb-2">A/B Testing Dashboard</h1>
+                <p class="text-purdue-dark-gray">Interactive statistical learning tool for hypothesis testing</p>
+                <div class="mt-3 text-sm text-purdue-gray">Powered by Purdue University Statistical Methods</div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- LEFT COLUMN - INPUTS -->
                 <div class="space-y-6">
                     <!-- Test Configuration -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4">Test Configuration</h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purdue-gold">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Test Configuration</h2>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Test Scenario</label>
-                                <select id="scenario" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2">Test Scenario</label>
+                                <select id="scenario" class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-gold focus:border-purdue-gold">
                                     <option value="website">Website Conversion Rate Test</option>
                                     <option value="email">Email Marketing Campaign Test</option>
                                     <option value="app">Mobile App Feature Test</option>
@@ -48,40 +90,40 @@
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Significance Level (α)</label>
-                                <select id="significance" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2">Significance Level (α)</label>
+                                <select id="significance" class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-gold focus:border-purdue-gold">
                                     <option value="0.10">0.10 (10%)</option>
                                     <option value="0.05" selected>0.05 (5%)</option>
                                     <option value="0.01">0.01 (1%)</option>
                                 </select>
                             </div>
 
-                            <div id="scenario-description" class="bg-blue-50 p-4 rounded-lg">
-                                <h3 class="font-semibold text-blue-800">Website Conversion Rate Test</h3>
-                                <p class="text-blue-700 text-sm">Testing if a new website design improves conversion rates</p>
+                            <div id="scenario-description" class="bg-purdue-gold-light p-4 rounded-lg border border-purdue-gold">
+                                <h3 class="font-semibold text-purdue-black">Website Conversion Rate Test</h3>
+                                <p class="text-purdue-dark-gray text-sm">Testing if a new website design improves conversion rates</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Group A Inputs -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4 text-blue-600">Group A: <span id="groupALabel">Original Design</span></h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purdue-black">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Group A: <span id="groupALabel">Original Design</span></h2>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2">Sample Size</label>
                                 <input type="number" id="groupASize" value="1000" min="50" max="10000" 
-                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                       class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-black focus:border-purdue-black">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2"><span id="metricA">Conversion Rate</span> (%)</label>
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2"><span id="metricA">Conversion Rate</span> (%)</label>
                                 <input type="number" id="groupARate" value="12.0" min="0" max="100" step="0.1"
-                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                       class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-black focus:border-purdue-black">
                             </div>
-                            <div class="bg-blue-50 p-3 rounded">
-                                <p class="text-sm text-blue-700">
+                            <div class="bg-purdue-gray-light p-3 rounded border border-purdue-gray">
+                                <p class="text-sm text-purdue-dark-gray">
                                     <strong>Conversions:</strong> <span id="groupAConversions">120</span> out of <span id="groupASizeDisplay">1000</span>
                                 </p>
-                                <p class="text-sm text-blue-700">
+                                <p class="text-sm text-purdue-dark-gray">
                                     <strong>Rate:</strong> <span id="groupARateDisplay">12.00%</span>
                                 </p>
                             </div>
@@ -89,24 +131,24 @@
                     </div>
 
                     <!-- Group B Inputs -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4 text-green-600">Group B: <span id="groupBLabel">New Design</span></h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purdue-gold">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-gold">Group B: <span id="groupBLabel">New Design</span></h2>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2">Sample Size</label>
                                 <input type="number" id="groupBSize" value="1000" min="50" max="10000"
-                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                                       class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-gold focus:border-purdue-gold">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2"><span id="metricB">Conversion Rate</span> (%)</label>
+                                <label class="block text-sm font-medium text-purdue-dark-gray mb-2"><span id="metricB">Conversion Rate</span> (%)</label>
                                 <input type="number" id="groupBRate" value="15.0" min="0" max="100" step="0.1"
-                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                                       class="w-full p-3 border border-purdue-gray rounded-md focus:ring-2 ring-purdue-gold focus:border-purdue-gold">
                             </div>
-                            <div class="bg-green-50 p-3 rounded">
-                                <p class="text-sm text-green-700">
+                            <div class="bg-purdue-gold-light p-3 rounded border border-purdue-gold">
+                                <p class="text-sm text-purdue-dark-gray">
                                     <strong>Conversions:</strong> <span id="groupBConversions">150</span> out of <span id="groupBSizeDisplay">1000</span>
                                 </p>
-                                <p class="text-sm text-green-700">
+                                <p class="text-sm text-purdue-dark-gray">
                                     <strong>Rate:</strong> <span id="groupBRateDisplay">15.00%</span>
                                 </p>
                             </div>
@@ -114,13 +156,13 @@
                     </div>
 
                     <!-- Learning Notes -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4">Learning Notes</h2>
-                        <div class="space-y-3 text-sm text-gray-700">
-                            <p><strong>P-Value:</strong> The probability of observing this difference (or more extreme) if there's truly no difference between groups.</p>
-                            <p><strong>Z-Statistic:</strong> Measures how many standard errors the observed difference is from zero.</p>
-                            <p><strong>Effect Size:</strong> The actual difference between groups, regardless of statistical significance.</p>
-                            <p><strong>Statistical Power:</strong> The probability of detecting a true difference when it exists.</p>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border border-purdue-gray">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Learning Notes</h2>
+                        <div class="space-y-3 text-sm text-purdue-dark-gray">
+                            <p><strong class="text-purdue-black">P-Value:</strong> The probability of observing this difference (or more extreme) if there's truly no difference between groups.</p>
+                            <p><strong class="text-purdue-black">Z-Statistic:</strong> Measures how many standard errors the observed difference is from zero.</p>
+                            <p><strong class="text-purdue-black">Effect Size:</strong> The actual difference between groups, regardless of statistical significance.</p>
+                            <p><strong class="text-purdue-black">Statistical Power:</strong> The probability of detecting a true difference when it exists.</p>
                         </div>
                     </div>
                 </div>
@@ -128,71 +170,71 @@
                 <!-- RIGHT COLUMN - RESULTS -->
                 <div class="space-y-6">
                     <!-- Visualization -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4">Visualization</h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-t-4 border-purdue-gold">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Visualization</h2>
                         <div class="h-64">
                             <canvas id="chartCanvas"></canvas>
                         </div>
                     </div>
 
                     <!-- Test Results -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-t-4 border-purdue-black">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Test Results</h2>
                         
-                        <div id="interpretation" class="p-4 rounded-lg mb-6 bg-green-50 border border-green-200">
-                            <p class="font-medium text-lg">🎉 Statistically Significant! The difference of 3.00% is unlikely due to chance alone (p = 0.0159). We can reject the null hypothesis.</p>
+                        <div id="interpretation" class="p-4 rounded-lg mb-6 bg-purdue-success border">
+                            <p class="font-medium text-lg text-purdue-black">🎉 Statistically Significant! The difference of 3.00% is unlikely due to chance alone (p = 0.0159). We can reject the null hypothesis.</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <h3 class="font-semibold text-gray-700 mb-1">Z-Statistic</h3>
-                                <p id="zStat" class="text-3xl font-bold text-blue-600">2.404</p>
+                            <div class="bg-purdue-gray-light p-4 rounded-lg text-center border border-purdue-gray">
+                                <h3 class="font-semibold text-purdue-dark-gray mb-1">Z-Statistic</h3>
+                                <p id="zStat" class="text-3xl font-bold text-purdue-black">2.404</p>
                             </div>
                             
-                            <div id="pValueBox" class="p-4 rounded-lg text-center text-yellow-700 bg-yellow-100">
-                                <h3 class="font-semibold mb-1">P-Value</h3>
-                                <p id="pValue" class="text-3xl font-bold">0.0163</p>
+                            <div id="pValueBox" class="p-4 rounded-lg text-center bg-purdue-warning border">
+                                <h3 class="font-semibold mb-1 text-purdue-black">P-Value</h3>
+                                <p id="pValue" class="text-3xl font-bold text-purdue-black">0.0163</p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <h3 class="font-semibold text-gray-700 mb-1">Effect Size</h3>
-                                <p id="effectSize" class="text-3xl font-bold text-purple-600">3.00%</p>
+                            <div class="bg-purdue-gray-light p-4 rounded-lg text-center border border-purdue-gray">
+                                <h3 class="font-semibold text-purdue-dark-gray mb-1">Effect Size</h3>
+                                <p id="effectSize" class="text-3xl font-bold text-purdue-gold">3.00%</p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg text-center">
-                                <h3 class="font-semibold text-gray-700 mb-1">Statistical Power</h3>
-                                <p id="power" class="text-3xl font-bold text-orange-600">75.2%</p>
+                            <div class="bg-purdue-gray-light p-4 rounded-lg text-center border border-purdue-gray">
+                                <h3 class="font-semibold text-purdue-dark-gray mb-1">Statistical Power</h3>
+                                <p id="power" class="text-3xl font-bold text-purdue-gold">75.2%</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Statistical Details -->
-                    <div class="bg-white rounded-lg shadow-lg p-6">
-                        <h2 class="text-xl font-semibold mb-4">Statistical Details</h2>
+                    <div class="bg-white rounded-lg shadow-lg p-6 border border-purdue-gray">
+                        <h2 class="text-xl font-semibold mb-4 text-purdue-black">Statistical Details</h2>
                         
                         <div class="space-y-4">
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <h3 class="font-semibold text-blue-800 mb-2">Hypothesis Test Setup</h3>
-                                <p class="text-blue-700 text-sm"><strong>H₀:</strong> p₁ = p₂ (No difference between groups)</p>
-                                <p class="text-blue-700 text-sm"><strong>H₁:</strong> p₁ ≠ p₂ (There is a difference between groups)</p>
-                                <p class="text-blue-700 text-sm"><strong>Significance Level:</strong> α = <span id="alphaDisplay">0.05</span></p>
+                            <div class="bg-purdue-gold-light p-4 rounded-lg border border-purdue-gold">
+                                <h3 class="font-semibold text-purdue-black mb-2">Hypothesis Test Setup</h3>
+                                <p class="text-purdue-dark-gray text-sm"><strong>H₀:</strong> p₁ = p₂ (No difference between groups)</p>
+                                <p class="text-purdue-dark-gray text-sm"><strong>H₁:</strong> p₁ ≠ p₂ (There is a difference between groups)</p>
+                                <p class="text-purdue-dark-gray text-sm"><strong>Significance Level:</strong> α = <span id="alphaDisplay">0.05</span></p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <h3 class="font-semibold text-gray-700 mb-2">Confidence Interval (95%)</h3>
-                                <p class="text-gray-700 text-sm">
-                                    The true difference is likely between <strong><span id="ciLower">0.55%</span></strong> and <strong><span id="ciUpper">5.45%</span></strong>
+                            <div class="bg-purdue-gray-light p-4 rounded-lg border border-purdue-gray">
+                                <h3 class="font-semibold text-purdue-black mb-2">Confidence Interval (95%)</h3>
+                                <p class="text-purdue-dark-gray text-sm">
+                                    The true difference is likely between <strong class="text-purdue-black"><span id="ciLower">0.55%</span></strong> and <strong class="text-purdue-black"><span id="ciUpper">5.45%</span></strong>
                                 </p>
-                                <p id="ciWarning" class="text-orange-600 mt-1 text-sm" style="display: none;">⚠️ The confidence interval includes 0, suggesting no significant difference.</p>
+                                <p id="ciWarning" class="text-purdue-gold mt-1 text-sm font-semibold" style="display: none;">⚠️ The confidence interval includes 0, suggesting no significant difference.</p>
                             </div>
 
-                            <div class="bg-yellow-50 p-4 rounded-lg">
-                                <h3 class="font-semibold text-yellow-800 mb-2">Key Metrics</h3>
+                            <div class="bg-purdue-gold-lighter p-4 rounded-lg border border-purdue-gold">
+                                <h3 class="font-semibold text-purdue-black mb-2">Key Metrics</h3>
                                 <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <p class="text-yellow-700"><strong>Pooled Proportion:</strong> <span id="pooledProp">13.50%</span></p>
-                                    <p class="text-yellow-700"><strong>Standard Error:</strong> <span id="standardError">0.0125</span></p>
-                                    <p class="text-yellow-700"><strong>Group A Rate:</strong> <span id="groupAFinal">12.00%</span></p>
-                                    <p class="text-yellow-700"><strong>Group B Rate:</strong> <span id="groupBFinal">15.00%</span></p>
+                                    <p class="text-purdue-dark-gray"><strong class="text-purdue-black">Pooled Proportion:</strong> <span id="pooledProp">13.50%</span></p>
+                                    <p class="text-purdue-dark-gray"><strong class="text-purdue-black">Standard Error:</strong> <span id="standardError">0.0125</span></p>
+                                    <p class="text-purdue-dark-gray"><strong class="text-purdue-black">Group A Rate:</strong> <span id="groupAFinal">12.00%</span></p>
+                                    <p class="text-purdue-dark-gray"><strong class="text-purdue-black">Group B Rate:</strong> <span id="groupBFinal">15.00%</span></p>
                                 </div>
                             </div>
                         </div>
@@ -203,6 +245,16 @@
     </div>
 
     <script>
+        // Purdue color palette
+        const purdueColors = {
+            campusGold: '#C28E0E',
+            athleticGold: '#CEB888',
+            black: '#000000',
+            gray: '#9D968D',
+            darkGray: '#373A36',
+            white: '#FFFFFF'
+        };
+
         // Scenario configurations
         const scenarios = {
             website: {
@@ -360,23 +412,23 @@
                 ? `🎉 Statistically Significant! The difference of ${results.effectSizePercent.toFixed(2)}% is unlikely due to chance alone (p = ${results.pValue.toFixed(4)}). We can reject the null hypothesis.`
                 : `❌ Not Statistically Significant. The observed difference of ${results.effectSizePercent.toFixed(2)}% could reasonably be due to chance (p = ${results.pValue.toFixed(4)}). We fail to reject the null hypothesis.`;
             
-            document.getElementById('interpretation').innerHTML = `<p class="font-medium text-lg">${interpretation}</p>`;
+            document.getElementById('interpretation').innerHTML = `<p class="font-medium text-lg text-purdue-black">${interpretation}</p>`;
             
             const interpretationBox = document.getElementById('interpretation');
             interpretationBox.className = results.isSignificant 
-                ? 'p-4 rounded-lg mb-6 bg-green-50 border border-green-200'
-                : 'p-4 rounded-lg mb-6 bg-red-50 border border-red-200';
+                ? 'p-4 rounded-lg mb-6 bg-purdue-success border'
+                : 'p-4 rounded-lg mb-6 bg-purdue-error border';
 
-            // Update p-value color
+            // Update p-value color using Purdue colors
             const pValueBox = document.getElementById('pValueBox');
             if (results.pValue < 0.001) {
-                pValueBox.className = 'p-4 rounded-lg text-center text-green-700 bg-green-100';
+                pValueBox.className = 'p-4 rounded-lg text-center bg-purdue-success border';
             } else if (results.pValue < 0.01) {
-                pValueBox.className = 'p-4 rounded-lg text-center text-green-600 bg-green-50';
+                pValueBox.className = 'p-4 rounded-lg text-center bg-purdue-gold-light border border-purdue-gold';
             } else if (results.pValue < 0.05) {
-                pValueBox.className = 'p-4 rounded-lg text-center text-yellow-700 bg-yellow-100';
+                pValueBox.className = 'p-4 rounded-lg text-center bg-purdue-warning border';
             } else {
-                pValueBox.className = 'p-4 rounded-lg text-center text-red-600 bg-red-50';
+                pValueBox.className = 'p-4 rounded-lg text-center bg-purdue-error border';
             }
 
             // Show/hide CI warning
@@ -404,8 +456,8 @@
                     datasets: [{
                         label: config.metric + ' (%)',
                         data: [groupARate, groupBRate],
-                        backgroundColor: ['#3B82F6', '#10B981'],
-                        borderColor: ['#2563EB', '#059669'],
+                        backgroundColor: [purdueColors.black, purdueColors.campusGold],
+                        borderColor: [purdueColors.darkGray, purdueColors.athleticGold],
                         borderWidth: 2
                     }]
                 },
@@ -424,7 +476,19 @@
                             ticks: {
                                 callback: function(value) {
                                     return value + '%';
-                                }
+                                },
+                                color: purdueColors.darkGray
+                            },
+                            grid: {
+                                color: purdueColors.gray
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: purdueColors.darkGray
+                            },
+                            grid: {
+                                color: purdueColors.gray
                             }
                         }
                     }
