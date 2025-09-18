@@ -70,14 +70,12 @@
           },
         };
 
-        const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
-
-        const erf = (x) => {
-          const a1 = 0.254829592;
-          const a2 = -0.284496736;
-          const a3 = 1.421413741;
-          const a4 = -1.453152027;
-          const a5 = 1.061405429;
+      const erf = (x) => {
+        const a1 = 0.254829592;
+        const a2 = -0.284496736;
+        const a3 = 1.421413741;
+        const a4 = -1.453152027;
+        const a5 = 1.061405429;
           const p = 0.3275911;
 
           const sign = x >= 0 ? 1 : -1;
@@ -91,6 +89,8 @@
 
           return sign * y;
         };
+
+      const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
 
         const calculatePower = (n1, n2, p1, p2) => {
           const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
