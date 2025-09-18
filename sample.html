@@ -7,6 +7,11 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Impact of Sample Size on Hypothesis testing</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' ry='12' fill='%233b82f6'/%3E%3Ctext x='32' y='40' font-family='Arial' font-size='28' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script
       crossorigin
@@ -16,10 +21,6 @@
       crossorigin
       src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
     ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/recharts@3.2.3/umd/Recharts.min.js"
-    ></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body class="bg-gray-100">
@@ -27,15 +28,68 @@
 
     <script type="text/babel">
       const { useState, useEffect } = React;
-      const {
-        BarChart,
-        Bar,
-        XAxis,
-        YAxis,
-        CartesianGrid,
-        Tooltip,
-        ResponsiveContainer,
-      } = Recharts;
+      const SimpleBarChart = ({ data, metricLabel }) => {
+        if (!data || data.length === 0) {
+          return (
+            <div className="flex h-full items-center justify-center text-gray-500">
+              No data to display
+            </div>
+          );
+        }
+
+        const maxValue = Math.max(
+          ...data.map((item) => (typeof item.rate === "number" ? item.rate : 0)),
+          1
+        );
+
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex-1 flex items-end justify-center px-4 space-x-6">
+              {data.map((item) => {
+                const rawRate =
+                  typeof item.rate === "number"
+                    ? item.rate
+                    : parseFloat(item.rate) || 0;
+                const percentage = Math.max(
+                  (rawRate / maxValue) * 100,
+                  rawRate > 0 ? 6 : 2
+                );
+                const formattedRate = Number.isFinite(rawRate)
+                  ? rawRate.toFixed(2)
+                  : "0.00";
+                return (
+                  <div
+                    key={item.name}
+                    className="flex-1 flex flex-col items-center"
+                    aria-label={`${item.name} ${formattedRate}%`}
+                  >
+                    <div className="flex-1 flex items-end w-full">
+                      <div
+                        className="w-full rounded-t-lg bg-gradient-to-t from-blue-600 to-blue-400 shadow-lg transition-all duration-300"
+                        style={{ height: `${percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="mt-3 text-center">
+                      <p className="text-lg font-semibold text-gray-800">
+                        {formattedRate}%
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {item.count} / {item.total}
+                      </p>
+                      <p className="text-xs uppercase tracking-wide text-gray-400">
+                        {metricLabel}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="border-t border-gray-200 mt-4 pt-2 text-center text-sm text-gray-500">
+              Values expressed as percentages
+            </div>
+          </div>
+        );
+      };
 
       const ABTestingDashboard = () => {
         const [scenario, setScenario] = useState("website");
@@ -432,28 +486,10 @@
                         Visualization
                       </h2>
                       <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip
-                              formatter={(value, name) => [
-                                name === "rate"
-                                  ? `${value}%`
-                                  : value,
-                                name === "rate"
-                                  ? "Conversion Rate"
-                                  : "Count",
-                              ]}
-                            />
-                            <Bar
-                              dataKey="rate"
-                              fill="#3B82F6"
-                              name="rate"
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        <SimpleBarChart
+                          data={chartData}
+                          metricLabel={scenarios[scenario].metric}
+                        />
                       </div>
                     </div>
 
