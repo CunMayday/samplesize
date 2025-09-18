@@ -16,7 +16,10 @@
       crossorigin
       src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
     ></script>
-    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script
+      crossorigin
+      src="https://cdn.jsdelivr.net/npm/recharts@3.2.3/umd/Recharts.min.js"
+    ></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body class="bg-gray-100">
@@ -70,14 +73,12 @@
           },
         };
 
-        const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
-
-        const erf = (x) => {
-          const a1 = 0.254829592;
-          const a2 = -0.284496736;
-          const a3 = 1.421413741;
-          const a4 = -1.453152027;
-          const a5 = 1.061405429;
+      const erf = (x) => {
+        const a1 = 0.254829592;
+        const a2 = -0.284496736;
+        const a3 = 1.421413741;
+        const a4 = -1.453152027;
+        const a5 = 1.061405429;
           const p = 0.3275911;
 
           const sign = x >= 0 ? 1 : -1;
@@ -91,6 +92,8 @@
 
           return sign * y;
         };
+
+      const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
 
         const calculatePower = (n1, n2, p1, p2) => {
           const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
