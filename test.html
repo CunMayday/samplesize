@@ -8,6 +8,9 @@
     <!-- Tailwind CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     
+    <!-- Chart.js for charts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
     <style>
         body {
             margin: 0;
@@ -17,407 +20,428 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        
-        .recharts-wrapper {
-            width: 100% !important;
-            height: 100% !important;
-        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <div class="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">A/B Testing Dashboard</h1>
+                <p class="text-gray-600">Interactive statistical learning tool for hypothesis testing</p>
+            </div>
 
-    <!-- React -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Recharts Dependencies -->
-    <script src="https://unpkg.com/d3-scale@4.0.2/dist/d3-scale.min.js"></script>
-    <script src="https://unpkg.com/d3-array@3.2.4/dist/d3-array.min.js"></script>
-    <script src="https://unpkg.com/d3-interpolate@3.0.1/dist/d3-interpolate.min.js"></script>
-    <script src="https://unpkg.com/d3-color@3.1.0/dist/d3-color.min.js"></script>
-    <script src="https://unpkg.com/d3-shape@3.2.0/dist/d3-shape.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- LEFT COLUMN - INPUTS -->
+                <div class="space-y-6">
+                    <!-- Test Configuration -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Test Configuration</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Test Scenario</label>
+                                <select id="scenario" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                    <option value="website">Website Conversion Rate Test</option>
+                                    <option value="email">Email Marketing Campaign Test</option>
+                                    <option value="app">Mobile App Feature Test</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Significance Level (α)</label>
+                                <select id="significance" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                    <option value="0.10">0.10 (10%)</option>
+                                    <option value="0.05" selected>0.05 (5%)</option>
+                                    <option value="0.01">0.01 (1%)</option>
+                                </select>
+                            </div>
+
+                            <div id="scenario-description" class="bg-blue-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-blue-800">Website Conversion Rate Test</h3>
+                                <p class="text-blue-700 text-sm">Testing if a new website design improves conversion rates</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group A Inputs -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-blue-600">Group A: <span id="groupALabel">Original Design</span></h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
+                                <input type="number" id="groupASize" value="1000" min="50" max="10000" 
+                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2"><span id="metricA">Conversion Rate</span> (%)</label>
+                                <input type="number" id="groupARate" value="12.0" min="0" max="100" step="0.1"
+                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded">
+                                <p class="text-sm text-blue-700">
+                                    <strong>Conversions:</strong> <span id="groupAConversions">120</span> out of <span id="groupASizeDisplay">1000</span>
+                                </p>
+                                <p class="text-sm text-blue-700">
+                                    <strong>Rate:</strong> <span id="groupARateDisplay">12.00%</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Group B Inputs -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-green-600">Group B: <span id="groupBLabel">New Design</span></h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Sample Size</label>
+                                <input type="number" id="groupBSize" value="1000" min="50" max="10000"
+                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2"><span id="metricB">Conversion Rate</span> (%)</label>
+                                <input type="number" id="groupBRate" value="15.0" min="0" max="100" step="0.1"
+                                       class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div class="bg-green-50 p-3 rounded">
+                                <p class="text-sm text-green-700">
+                                    <strong>Conversions:</strong> <span id="groupBConversions">150</span> out of <span id="groupBSizeDisplay">1000</span>
+                                </p>
+                                <p class="text-sm text-green-700">
+                                    <strong>Rate:</strong> <span id="groupBRateDisplay">15.00%</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Notes -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Learning Notes</h2>
+                        <div class="space-y-3 text-sm text-gray-700">
+                            <p><strong>P-Value:</strong> The probability of observing this difference (or more extreme) if there's truly no difference between groups.</p>
+                            <p><strong>Z-Statistic:</strong> Measures how many standard errors the observed difference is from zero.</p>
+                            <p><strong>Effect Size:</strong> The actual difference between groups, regardless of statistical significance.</p>
+                            <p><strong>Statistical Power:</strong> The probability of detecting a true difference when it exists.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN - RESULTS -->
+                <div class="space-y-6">
+                    <!-- Visualization -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Visualization</h2>
+                        <div class="h-64">
+                            <canvas id="chartCanvas"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Test Results -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+                        
+                        <div id="interpretation" class="p-4 rounded-lg mb-6 bg-green-50 border border-green-200">
+                            <p class="font-medium text-lg">🎉 Statistically Significant! The difference of 3.00% is unlikely due to chance alone (p = 0.0159). We can reject the null hypothesis.</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <h3 class="font-semibold text-gray-700 mb-1">Z-Statistic</h3>
+                                <p id="zStat" class="text-3xl font-bold text-blue-600">2.404</p>
+                            </div>
+                            
+                            <div id="pValueBox" class="p-4 rounded-lg text-center text-yellow-700 bg-yellow-100">
+                                <h3 class="font-semibold mb-1">P-Value</h3>
+                                <p id="pValue" class="text-3xl font-bold">0.0163</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <h3 class="font-semibold text-gray-700 mb-1">Effect Size</h3>
+                                <p id="effectSize" class="text-3xl font-bold text-purple-600">3.00%</p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                <h3 class="font-semibold text-gray-700 mb-1">Statistical Power</h3>
+                                <p id="power" class="text-3xl font-bold text-orange-600">75.2%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistical Details -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Statistical Details</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-blue-800 mb-2">Hypothesis Test Setup</h3>
+                                <p class="text-blue-700 text-sm"><strong>H₀:</strong> p₁ = p₂ (No difference between groups)</p>
+                                <p class="text-blue-700 text-sm"><strong>H₁:</strong> p₁ ≠ p₂ (There is a difference between groups)</p>
+                                <p class="text-blue-700 text-sm"><strong>Significance Level:</strong> α = <span id="alphaDisplay">0.05</span></p>
+                            </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-gray-700 mb-2">Confidence Interval (95%)</h3>
+                                <p class="text-gray-700 text-sm">
+                                    The true difference is likely between <strong><span id="ciLower">0.55%</span></strong> and <strong><span id="ciUpper">5.45%</span></strong>
+                                </p>
+                                <p id="ciWarning" class="text-orange-600 mt-1 text-sm" style="display: none;">⚠️ The confidence interval includes 0, suggesting no significant difference.</p>
+                            </div>
+
+                            <div class="bg-yellow-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-yellow-800 mb-2">Key Metrics</h3>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <p class="text-yellow-700"><strong>Pooled Proportion:</strong> <span id="pooledProp">13.50%</span></p>
+                                    <p class="text-yellow-700"><strong>Standard Error:</strong> <span id="standardError">0.0125</span></p>
+                                    <p class="text-yellow-700"><strong>Group A Rate:</strong> <span id="groupAFinal">12.00%</span></p>
+                                    <p class="text-yellow-700"><strong>Group B Rate:</strong> <span id="groupBFinal">15.00%</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const { useState, useEffect, createElement: e } = React;
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
-
-        const ABTestingDashboard = () => {
-            const [scenario, setScenario] = useState('website');
-            const [groupASize, setGroupASize] = useState(1000);
-            const [groupBSize, setGroupBSize] = useState(1000);
-            const [groupARate, setGroupARate] = useState(0.12);
-            const [groupBRate, setGroupBRate] = useState(0.15);
-            const [significanceLevel, setSignificanceLevel] = useState(0.05);
-            const [results, setResults] = useState(null);
-
-            const scenarios = {
-                website: {
-                    title: "Website Conversion Rate Test",
-                    description: "Testing if a new website design improves conversion rates",
-                    metric: "Conversion Rate",
-                    groupALabel: "Original Design",
-                    groupBLabel: "New Design"
-                },
-                email: {
-                    title: "Email Marketing Campaign Test",
-                    description: "Testing if a new email subject line improves open rates",
-                    metric: "Open Rate",
-                    groupALabel: "Current Subject",
-                    groupBLabel: "New Subject"
-                },
-                app: {
-                    title: "Mobile App Feature Test",
-                    description: "Testing if a new button color increases click-through rates",
-                    metric: "Click-through Rate",
-                    groupALabel: "Blue Button",
-                    groupBLabel: "Red Button"
-                }
-            };
-
-            const calculateResults = () => {
-                const groupASuccesses = Math.round(groupASize * groupARate);
-                const groupBSuccesses = Math.round(groupBSize * groupBRate);
-                
-                const p1 = groupASuccesses / groupASize;
-                const p2 = groupBSuccesses / groupBSize;
-                
-                const pooledP = (groupASuccesses + groupBSuccesses) / (groupASize + groupBSize);
-                const se = Math.sqrt(pooledP * (1 - pooledP) * (1/groupASize + 1/groupBSize));
-                const zStat = (p2 - p1) / se;
-                const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
-                
-                const effectSize = p2 - p1;
-                const effectSizePercent = (effectSize * 100);
-                
-                const seDiff = Math.sqrt((p1 * (1 - p1)) / groupASize + (p2 * (1 - p2)) / groupBSize);
-                const criticalValue = 1.96;
-                const ciLower = effectSize - criticalValue * seDiff;
-                const ciUpper = effectSize + criticalValue * seDiff;
-                
-                const power = calculatePower(groupASize, groupBSize, p1, p2, significanceLevel);
-                
-                return {
-                    groupASuccesses,
-                    groupBSuccesses,
-                    p1,
-                    p2,
-                    zStat,
-                    pValue,
-                    effectSize,
-                    effectSizePercent,
-                    ciLower: ciLower * 100,
-                    ciUpper: ciUpper * 100,
-                    isSignificant: pValue < significanceLevel,
-                    power,
-                    pooledP,
-                    se
-                };
-            };
-
-            const normalCDF = (x) => {
-                return 0.5 * (1 + erf(x / Math.sqrt(2)));
-            };
-
-            const erf = (x) => {
-                const a1 = 0.254829592;
-                const a2 = -0.284496736;
-                const a3 = 1.421413741;
-                const a4 = -1.453152027;
-                const a5 = 1.061405429;
-                const p = 0.3275911;
-                
-                const sign = x >= 0 ? 1 : -1;
-                x = Math.abs(x);
-                
-                const t = 1.0 / (1.0 + p * x);
-                const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-                
-                return sign * y;
-            };
-
-            const calculatePower = (n1, n2, p1, p2, alpha) => {
-                const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
-                const se1 = Math.sqrt(pooledP * (1 - pooledP) * (1/n1 + 1/n2));
-                const se2 = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2);
-                const criticalValue = 1.96;
-                const effectSize = Math.abs(p2 - p1);
-                const zBeta = (effectSize - criticalValue * se1) / se2;
-                return normalCDF(zBeta);
-            };
-
-            useEffect(() => {
-                setResults(calculateResults());
-            }, [scenario, groupASize, groupBSize, groupARate, groupBRate, significanceLevel]);
-
-            const chartData = [
-                {
-                    name: scenarios[scenario].groupALabel,
-                    rate: parseFloat((groupARate * 100).toFixed(2)),
-                    count: Math.round(groupASize * groupARate),
-                    total: groupASize
-                },
-                {
-                    name: scenarios[scenario].groupBLabel,
-                    rate: parseFloat((groupBRate * 100).toFixed(2)),
-                    count: Math.round(groupBSize * groupBRate),
-                    total: groupBSize
-                }
-            ];
-
-            const getSignificanceColor = (pValue) => {
-                if (pValue < 0.001) return 'text-green-700 bg-green-100';
-                if (pValue < 0.01) return 'text-green-600 bg-green-50';
-                if (pValue < 0.05) return 'text-yellow-700 bg-yellow-100';
-                return 'text-red-600 bg-red-50';
-            };
-
-            const getInterpretation = () => {
-                if (!results) return '';
-                
-                const { pValue, isSignificant, effectSizePercent } = results;
-                
-                if (isSignificant) {
-                    return `🎉 Statistically Significant! The difference of ${effectSizePercent.toFixed(2)}% is unlikely due to chance alone (p = ${pValue.toFixed(4)}). We can reject the null hypothesis.`;
-                } else {
-                    return `❌ Not Statistically Significant. The observed difference of ${effectSizePercent.toFixed(2)}% could reasonably be due to chance (p = ${pValue.toFixed(4)}). We fail to reject the null hypothesis.`;
-                }
-            };
-
-            return e('div', { className: "p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen" },
-                e('div', { className: "bg-white rounded-lg shadow-lg p-6 mb-6" },
-                    e('h1', { className: "text-3xl font-bold text-gray-800 mb-2" }, "A/B Testing Dashboard"),
-                    e('p', { className: "text-gray-600" }, "Interactive statistical learning tool for hypothesis testing")
-                ),
-
-                e('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" },
-                    // LEFT COLUMN - INPUTS
-                    e('div', { className: "space-y-6" },
-                        // Scenario Selection
-                        e('div', { className: "bg-white rounded-lg shadow-lg p-6" },
-                            e('h2', { className: "text-xl font-semibold mb-4" }, "Test Configuration"),
-                            e('div', { className: "space-y-4" },
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Test Scenario"),
-                                    e('select', {
-                                        value: scenario,
-                                        onChange: (ev) => setScenario(ev.target.value),
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                                    },
-                                        Object.entries(scenarios).map(([key, value]) => 
-                                            e('option', { key: key, value: key }, value.title)
-                                        )
-                                    )
-                                ),
-                                
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Significance Level (α)"),
-                                    e('select', {
-                                        value: significanceLevel,
-                                        onChange: (ev) => setSignificanceLevel(parseFloat(ev.target.value)),
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                                    },
-                                        e('option', { value: 0.10 }, "0.10 (10%)"),
-                                        e('option', { value: 0.05 }, "0.05 (5%)"),
-                                        e('option', { value: 0.01 }, "0.01 (1%)")
-                                    )
-                                ),
-
-                                e('div', { className: "bg-blue-50 p-4 rounded-lg" },
-                                    e('h3', { className: "font-semibold text-blue-800" }, scenarios[scenario].title),
-                                    e('p', { className: "text-blue-700 text-sm" }, scenarios[scenario].description)
-                                )
-                            )
-                        ),
-
-                        // Group A Inputs
-                        e('div', { className: "bg-white rounded-lg shadow-lg p-6" },
-                            e('h2', { className: "text-xl font-semibold mb-4 text-blue-600" }, `Group A: ${scenarios[scenario].groupALabel}`),
-                            e('div', { className: "space-y-4" },
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Sample Size"),
-                                    e('input', {
-                                        type: "number",
-                                        value: groupASize,
-                                        onChange: (ev) => setGroupASize(parseInt(ev.target.value) || 0),
-                                        min: "50",
-                                        max: "10000",
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                                    })
-                                ),
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, `${scenarios[scenario].metric} (%)`),
-                                    e('input', {
-                                        type: "number",
-                                        value: (groupARate * 100).toFixed(1),
-                                        onChange: (ev) => setGroupARate(parseFloat(ev.target.value) / 100 || 0),
-                                        min: "0",
-                                        max: "100",
-                                        step: "0.1",
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                                    })
-                                ),
-                                e('div', { className: "bg-blue-50 p-3 rounded" },
-                                    e('p', { className: "text-sm text-blue-700" },
-                                        e('strong', null, "Conversions: "), `${Math.round(groupASize * groupARate)} out of ${groupASize}`
-                                    ),
-                                    e('p', { className: "text-sm text-blue-700" },
-                                        e('strong', null, "Rate: "), `${(groupARate * 100).toFixed(2)}%`
-                                    )
-                                )
-                            )
-                        ),
-
-                        // Group B Inputs
-                        e('div', { className: "bg-white rounded-lg shadow-lg p-6" },
-                            e('h2', { className: "text-xl font-semibold mb-4 text-green-600" }, `Group B: ${scenarios[scenario].groupBLabel}`),
-                            e('div', { className: "space-y-4" },
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, "Sample Size"),
-                                    e('input', {
-                                        type: "number",
-                                        value: groupBSize,
-                                        onChange: (ev) => setGroupBSize(parseInt(ev.target.value) || 0),
-                                        min: "50",
-                                        max: "10000",
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                                    })
-                                ),
-                                e('div', null,
-                                    e('label', { className: "block text-sm font-medium text-gray-700 mb-2" }, `${scenarios[scenario].metric} (%)`),
-                                    e('input', {
-                                        type: "number",
-                                        value: (groupBRate * 100).toFixed(1),
-                                        onChange: (ev) => setGroupBRate(parseFloat(ev.target.value) / 100 || 0),
-                                        min: "0",
-                                        max: "100",
-                                        step: "0.1",
-                                        className: "w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                                    })
-                                ),
-                                e('div', { className: "bg-green-50 p-3 rounded" },
-                                    e('p', { className: "text-sm text-green-700" },
-                                        e('strong', null, "Conversions: "), `${Math.round(groupBSize * groupBRate)} out of ${groupBSize}`
-                                    ),
-                                    e('p', { className: "text-sm text-green-700" },
-                                        e('strong', null, "Rate: "), `${(groupBRate * 100).toFixed(2)}%`
-                                    )
-                                )
-                            )
-                        ),
-
-                        // Learning Notes
-                        e('div', { className: "bg-white rounded-lg shadow-lg p-6" },
-                            e('h2', { className: "text-xl font-semibold mb-4" }, "Learning Notes"),
-                            e('div', { className: "space-y-3 text-sm text-gray-700" },
-                                e('p', null, e('strong', null, "P-Value: "), "The probability of observing this difference (or more extreme) if there's truly no difference between groups."),
-                                e('p', null, e('strong', null, "Z-Statistic: "), "Measures how many standard errors the observed difference is from zero."),
-                                e('p', null, e('strong', null, "Effect Size: "), "The actual difference between groups, regardless of statistical significance."),
-                                e('p', null, e('strong', null, "Statistical Power: "), "The probability of detecting a true difference when it exists.")
-                            )
-                        )
-                    ),
-
-                    // RIGHT COLUMN - RESULTS
-                    e('div', { className: "space-y-6" },
-                        results && [
-                            // Visualization
-                            e('div', { key: "viz", className: "bg-white rounded-lg shadow-lg p-6" },
-                                e('h2', { className: "text-xl font-semibold mb-4" }, "Visualization"),
-                                e('div', { className: "h-64" },
-                                    e(ResponsiveContainer, { width: "100%", height: "100%" },
-                                        e(BarChart, { data: chartData },
-                                            e(CartesianGrid, { strokeDasharray: "3 3" }),
-                                            e(XAxis, { dataKey: "name" }),
-                                            e(YAxis, null),
-                                            e(Tooltip, {
-                                                formatter: (value, name) => [
-                                                    name === 'rate' ? `${value}%` : value,
-                                                    name === 'rate' ? 'Conversion Rate' : 'Count'
-                                                ]
-                                            }),
-                                            e(Bar, { dataKey: "rate", fill: "#3B82F6", name: "rate" })
-                                        )
-                                    )
-                                )
-                            ),
-
-                            // Test Results
-                            e('div', { key: "results", className: "bg-white rounded-lg shadow-lg p-6" },
-                                e('h2', { className: "text-xl font-semibold mb-4" }, "Test Results"),
-                                
-                                e('div', {
-                                    className: `p-4 rounded-lg mb-6 ${results.isSignificant ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`
-                                },
-                                    e('p', { className: "font-medium text-lg" }, getInterpretation())
-                                ),
-
-                                e('div', { className: "grid grid-cols-2 gap-4 mb-6" },
-                                    e('div', { className: "bg-gray-50 p-4 rounded-lg text-center" },
-                                        e('h3', { className: "font-semibold text-gray-700 mb-1" }, "Z-Statistic"),
-                                        e('p', { className: "text-3xl font-bold text-blue-600" }, results.zStat.toFixed(3))
-                                    ),
-                                    
-                                    e('div', { className: `p-4 rounded-lg text-center ${getSignificanceColor(results.pValue)}` },
-                                        e('h3', { className: "font-semibold mb-1" }, "P-Value"),
-                                        e('p', { className: "text-3xl font-bold" }, results.pValue.toFixed(4))
-                                    ),
-                                    
-                                    e('div', { className: "bg-gray-50 p-4 rounded-lg text-center" },
-                                        e('h3', { className: "font-semibold text-gray-700 mb-1" }, "Effect Size"),
-                                        e('p', { className: "text-3xl font-bold text-purple-600" }, `${results.effectSizePercent.toFixed(2)}%`)
-                                    ),
-                                    
-                                    e('div', { className: "bg-gray-50 p-4 rounded-lg text-center" },
-                                        e('h3', { className: "font-semibold text-gray-700 mb-1" }, "Statistical Power"),
-                                        e('p', { className: "text-3xl font-bold text-orange-600" }, `${(results.power * 100).toFixed(1)}%`)
-                                    )
-                                )
-                            ),
-
-                            // Statistical Details
-                            e('div', { key: "details", className: "bg-white rounded-lg shadow-lg p-6" },
-                                e('h2', { className: "text-xl font-semibold mb-4" }, "Statistical Details"),
-                                
-                                e('div', { className: "space-y-4" },
-                                    e('div', { className: "bg-blue-50 p-4 rounded-lg" },
-                                        e('h3', { className: "font-semibold text-blue-800 mb-2" }, "Hypothesis Test Setup"),
-                                        e('p', { className: "text-blue-700 text-sm" }, e('strong', null, "H₀: "), "p₁ = p₂ (No difference between groups)"),
-                                        e('p', { className: "text-blue-700 text-sm" }, e('strong', null, "H₁: "), "p₁ ≠ p₂ (There is a difference between groups)"),
-                                        e('p', { className: "text-blue-700 text-sm" }, e('strong', null, "Significance Level: "), `α = ${significanceLevel}`)
-                                    ),
-                                    
-                                    e('div', { className: "bg-gray-50 p-4 rounded-lg" },
-                                        e('h3', { className: "font-semibold text-gray-700 mb-2" }, "Confidence Interval (95%)"),
-                                        e('p', { className: "text-gray-700 text-sm" },
-                                            "The true difference is likely between ",
-                                            e('strong', null, `${results.ciLower.toFixed(2)}%`),
-                                            " and ",
-                                            e('strong', null, `${results.ciUpper.toFixed(2)}%`)
-                                        ),
-                                        results.ciLower <= 0 && results.ciUpper >= 0 && 
-                                            e('p', { className: "text-orange-600 mt-1 text-sm" }, "⚠️ The confidence interval includes 0, suggesting no significant difference.")
-                                    ),
-
-                                    e('div', { className: "bg-yellow-50 p-4 rounded-lg" },
-                                        e('h3', { className: "font-semibold text-yellow-800 mb-2" }, "Key Metrics"),
-                                        e('div', { className: "grid grid-cols-2 gap-2 text-sm" },
-                                            e('p', { className: "text-yellow-700" }, e('strong', null, "Pooled Proportion: "), `${(results.pooledP * 100).toFixed(2)}%`),
-                                            e('p', { className: "text-yellow-700" }, e('strong', null, "Standard Error: "), results.se.toFixed(4)),
-                                            e('p', { className: "text-yellow-700" }, e('strong', null, "Group A Rate: "), `${(results.p1 * 100).toFixed(2)}%`),
-                                            e('p', { className: "text-yellow-700" }, e('strong', null, "Group B Rate: "), `${(results.p2 * 100).toFixed(2)}%`)
-                                        )
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            );
+        // Scenario configurations
+        const scenarios = {
+            website: {
+                title: "Website Conversion Rate Test",
+                description: "Testing if a new website design improves conversion rates",
+                metric: "Conversion Rate",
+                groupALabel: "Original Design",
+                groupBLabel: "New Design"
+            },
+            email: {
+                title: "Email Marketing Campaign Test",
+                description: "Testing if a new email subject line improves open rates",
+                metric: "Open Rate",
+                groupALabel: "Current Subject",
+                groupBLabel: "New Subject"
+            },
+            app: {
+                title: "Mobile App Feature Test",
+                description: "Testing if a new button color increases click-through rates",
+                metric: "Click-through Rate",
+                groupALabel: "Blue Button",
+                groupBLabel: "Red Button"
+            }
         };
 
-        ReactDOM.render(React.createElement(ABTestingDashboard), document.getElementById('root'));
+        let chart = null;
+
+        // Statistical functions
+        function normalCDF(x) {
+            return 0.5 * (1 + erf(x / Math.sqrt(2)));
+        }
+
+        function erf(x) {
+            const a1 = 0.254829592;
+            const a2 = -0.284496736;
+            const a3 = 1.421413741;
+            const a4 = -1.453152027;
+            const a5 = 1.061405429;
+            const p = 0.3275911;
+            
+            const sign = x >= 0 ? 1 : -1;
+            x = Math.abs(x);
+            
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            
+            return sign * y;
+        }
+
+        function calculatePower(n1, n2, p1, p2, alpha) {
+            const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
+            const se1 = Math.sqrt(pooledP * (1 - pooledP) * (1/n1 + 1/n2));
+            const se2 = Math.sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2);
+            const criticalValue = 1.96;
+            const effectSize = Math.abs(p2 - p1);
+            const zBeta = (effectSize - criticalValue * se1) / se2;
+            return normalCDF(zBeta);
+        }
+
+        function calculateResults() {
+            const groupASize = parseInt(document.getElementById('groupASize').value) || 0;
+            const groupBSize = parseInt(document.getElementById('groupBSize').value) || 0;
+            const groupARate = parseFloat(document.getElementById('groupARate').value) / 100 || 0;
+            const groupBRate = parseFloat(document.getElementById('groupBRate').value) / 100 || 0;
+            const significanceLevel = parseFloat(document.getElementById('significance').value) || 0.05;
+
+            const groupASuccesses = Math.round(groupASize * groupARate);
+            const groupBSuccesses = Math.round(groupBSize * groupBRate);
+            
+            const p1 = groupASuccesses / groupASize;
+            const p2 = groupBSuccesses / groupBSize;
+            
+            const pooledP = (groupASuccesses + groupBSuccesses) / (groupASize + groupBSize);
+            const se = Math.sqrt(pooledP * (1 - pooledP) * (1/groupASize + 1/groupBSize));
+            const zStat = (p2 - p1) / se;
+            const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
+            
+            const effectSize = p2 - p1;
+            const effectSizePercent = effectSize * 100;
+            
+            const seDiff = Math.sqrt((p1 * (1 - p1)) / groupASize + (p2 * (1 - p2)) / groupBSize);
+            const criticalValue = 1.96;
+            const ciLower = effectSize - criticalValue * seDiff;
+            const ciUpper = effectSize + criticalValue * seDiff;
+            
+            const power = calculatePower(groupASize, groupBSize, p1, p2, significanceLevel);
+            const isSignificant = pValue < significanceLevel;
+
+            return {
+                groupASuccesses,
+                groupBSuccesses,
+                p1,
+                p2,
+                zStat,
+                pValue,
+                effectSize,
+                effectSizePercent,
+                ciLower: ciLower * 100,
+                ciUpper: ciUpper * 100,
+                isSignificant,
+                power,
+                pooledP,
+                se
+            };
+        }
+
+        function updateDisplay() {
+            const scenario = document.getElementById('scenario').value;
+            const config = scenarios[scenario];
+            
+            // Update scenario labels
+            document.getElementById('groupALabel').textContent = config.groupALabel;
+            document.getElementById('groupBLabel').textContent = config.groupBLabel;
+            document.getElementById('metricA').textContent = config.metric;
+            document.getElementById('metricB').textContent = config.metric;
+            
+            document.querySelector('#scenario-description h3').textContent = config.title;
+            document.querySelector('#scenario-description p').textContent = config.description;
+
+            // Update conversion displays
+            const groupASize = parseInt(document.getElementById('groupASize').value) || 0;
+            const groupBSize = parseInt(document.getElementById('groupBSize').value) || 0;
+            const groupARate = parseFloat(document.getElementById('groupARate').value) || 0;
+            const groupBRate = parseFloat(document.getElementById('groupBRate').value) || 0;
+
+            const groupAConversions = Math.round(groupASize * groupARate / 100);
+            const groupBConversions = Math.round(groupBSize * groupBRate / 100);
+
+            document.getElementById('groupAConversions').textContent = groupAConversions;
+            document.getElementById('groupASizeDisplay').textContent = groupASize;
+            document.getElementById('groupARateDisplay').textContent = groupARate.toFixed(2) + '%';
+
+            document.getElementById('groupBConversions').textContent = groupBConversions;
+            document.getElementById('groupBSizeDisplay').textContent = groupBSize;
+            document.getElementById('groupBRateDisplay').textContent = groupBRate.toFixed(2) + '%';
+
+            // Calculate and display results
+            const results = calculateResults();
+            
+            document.getElementById('zStat').textContent = results.zStat.toFixed(3);
+            document.getElementById('pValue').textContent = results.pValue.toFixed(4);
+            document.getElementById('effectSize').textContent = results.effectSizePercent.toFixed(2) + '%';
+            document.getElementById('power').textContent = (results.power * 100).toFixed(1) + '%';
+            
+            document.getElementById('alphaDisplay').textContent = document.getElementById('significance').value;
+            document.getElementById('ciLower').textContent = results.ciLower.toFixed(2) + '%';
+            document.getElementById('ciUpper').textContent = results.ciUpper.toFixed(2) + '%';
+            document.getElementById('pooledProp').textContent = (results.pooledP * 100).toFixed(2) + '%';
+            document.getElementById('standardError').textContent = results.se.toFixed(4);
+            document.getElementById('groupAFinal').textContent = (results.p1 * 100).toFixed(2) + '%';
+            document.getElementById('groupBFinal').textContent = (results.p2 * 100).toFixed(2) + '%';
+
+            // Update interpretation
+            const interpretation = results.isSignificant 
+                ? `🎉 Statistically Significant! The difference of ${results.effectSizePercent.toFixed(2)}% is unlikely due to chance alone (p = ${results.pValue.toFixed(4)}). We can reject the null hypothesis.`
+                : `❌ Not Statistically Significant. The observed difference of ${results.effectSizePercent.toFixed(2)}% could reasonably be due to chance (p = ${results.pValue.toFixed(4)}). We fail to reject the null hypothesis.`;
+            
+            document.getElementById('interpretation').innerHTML = `<p class="font-medium text-lg">${interpretation}</p>`;
+            
+            const interpretationBox = document.getElementById('interpretation');
+            interpretationBox.className = results.isSignificant 
+                ? 'p-4 rounded-lg mb-6 bg-green-50 border border-green-200'
+                : 'p-4 rounded-lg mb-6 bg-red-50 border border-red-200';
+
+            // Update p-value color
+            const pValueBox = document.getElementById('pValueBox');
+            if (results.pValue < 0.001) {
+                pValueBox.className = 'p-4 rounded-lg text-center text-green-700 bg-green-100';
+            } else if (results.pValue < 0.01) {
+                pValueBox.className = 'p-4 rounded-lg text-center text-green-600 bg-green-50';
+            } else if (results.pValue < 0.05) {
+                pValueBox.className = 'p-4 rounded-lg text-center text-yellow-700 bg-yellow-100';
+            } else {
+                pValueBox.className = 'p-4 rounded-lg text-center text-red-600 bg-red-50';
+            }
+
+            // Show/hide CI warning
+            const ciWarning = document.getElementById('ciWarning');
+            if (results.ciLower <= 0 && results.ciUpper >= 0) {
+                ciWarning.style.display = 'block';
+            } else {
+                ciWarning.style.display = 'none';
+            }
+
+            updateChart(config, groupARate, groupBRate);
+        }
+
+        function updateChart(config, groupARate, groupBRate) {
+            const ctx = document.getElementById('chartCanvas');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [config.groupALabel, config.groupBLabel],
+                    datasets: [{
+                        label: config.metric + ' (%)',
+                        data: [groupARate, groupBRate],
+                        backgroundColor: ['#3B82F6', '#10B981'],
+                        borderColor: ['#2563EB', '#059669'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: Math.max(groupARate, groupBRate) * 1.2,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Event listeners
+        document.getElementById('scenario').addEventListener('change', updateDisplay);
+        document.getElementById('significance').addEventListener('change', updateDisplay);
+        document.getElementById('groupASize').addEventListener('input', updateDisplay);
+        document.getElementById('groupBSize').addEventListener('input', updateDisplay);
+        document.getElementById('groupARate').addEventListener('input', updateDisplay);
+        document.getElementById('groupBRate').addEventListener('input', updateDisplay);
+
+        // Initial update
+        updateDisplay();
     </script>
 </body>
 </html>
