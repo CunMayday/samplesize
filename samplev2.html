@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Impact of Sample Size on Hypothesis testing</title>
+    <title>Impact of sample size on hypothesis testing v2</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -23,7 +23,7 @@
     ></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-white text-[#000000]">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -31,7 +31,7 @@
       const SimpleBarChart = ({ data, metricLabel }) => {
         if (!data || data.length === 0) {
           return (
-            <div className="flex h-full items-center justify-center text-gray-500">
+            <div className="flex h-full items-center justify-center text-[#9D968D]">
               No data to display
             </div>
           );
@@ -65,18 +65,18 @@
                   >
                     <div className="flex-1 flex items-end w-full">
                       <div
-                        className="w-full rounded-t-lg bg-gradient-to-t from-blue-600 to-blue-400 shadow-lg transition-all duration-300"
+                        className="w-full rounded-t-lg bg-gradient-to-t from-[#C28E0E] to-[#CEB888] shadow-lg transition-all duration-300"
                         style={{ height: `${percentage}%` }}
                       ></div>
                     </div>
                     <div className="mt-3 text-center">
-                      <p className="text-lg font-semibold text-gray-800">
+                      <p className="text-lg font-semibold text-[#000000]">
                         {formattedRate}%
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-[#373A36]">
                         {item.count} / {item.total}
                       </p>
-                      <p className="text-xs uppercase tracking-wide text-gray-400">
+                      <p className="text-xs uppercase tracking-wide text-[#9D968D]">
                         {metricLabel}
                       </p>
                     </div>
@@ -84,7 +84,7 @@
                 );
               })}
             </div>
-            <div className="border-t border-gray-200 mt-4 pt-2 text-center text-sm text-gray-500">
+            <div className="border-t border-[#9D968D]/40 mt-4 pt-2 text-center text-sm text-[#373A36]">
               Values expressed as percentages
             </div>
           </div>
@@ -92,39 +92,20 @@
       };
 
       const ABTestingDashboard = () => {
-        const [scenario, setScenario] = useState("website");
         const [groupASize, setGroupASize] = useState(1000);
         const [groupBSize, setGroupBSize] = useState(1000);
         const [groupARate, setGroupARate] = useState(0.12);
         const [groupBRate, setGroupBRate] = useState(0.15);
-        const [significanceLevel, setSignificanceLevel] = useState(0.05);
         const [results, setResults] = useState(null);
 
-        const scenarios = {
-          website: {
-            title: "Website Conversion Rate Test",
-            description:
-              "Testing if a new website design improves conversion rates",
-            metric: "Conversion Rate",
-            groupALabel: "Original Design",
-            groupBLabel: "New Design",
-          },
-          email: {
-            title: "Email Marketing Campaign Test",
-            description:
-              "Testing if a new email subject line improves open rates",
-            metric: "Open Rate",
-            groupALabel: "Current Subject",
-            groupBLabel: "New Subject",
-          },
-          app: {
-            title: "Mobile App Feature Test",
-            description:
-              "Testing if a new button color increases click-through rates",
-            metric: "Click-through Rate",
-            groupALabel: "Blue Button",
-            groupBLabel: "Red Button",
-          },
+        const significanceLevel = 0.05;
+        const scenarioDetails = {
+          title: "Email Marketing Campaign Test",
+          description:
+            "Explore how sample size influences our confidence when comparing the open rates of two email subject lines.",
+          metric: "Open Rate",
+          groupALabel: "Current Subject",
+          groupBLabel: "New Subject",
         };
 
       const erf = (x) => {
@@ -226,13 +207,7 @@
           const ciLower = effectSize - criticalValue * seDiff;
           const ciUpper = effectSize + criticalValue * seDiff;
 
-          const power = calculatePower(
-            groupASize,
-            groupBSize,
-            p1,
-            p2,
-            significanceLevel
-          );
+          const power = calculatePower(groupASize, groupBSize, p1, p2);
 
           return {
             groupASuccesses,
@@ -254,24 +229,17 @@
 
         useEffect(() => {
           setResults(calculateResults());
-        }, [
-          scenario,
-          groupASize,
-          groupBSize,
-          groupARate,
-          groupBRate,
-          significanceLevel,
-        ]);
+        }, [groupASize, groupBSize, groupARate, groupBRate]);
 
         const chartData = [
           {
-            name: scenarios[scenario].groupALabel,
+            name: scenarioDetails.groupALabel,
             rate: parseFloat((groupARate * 100).toFixed(2)),
             count: Math.round(groupASize * groupARate),
             total: groupASize,
           },
           {
-            name: scenarios[scenario].groupBLabel,
+            name: scenarioDetails.groupBLabel,
             rate: parseFloat((groupBRate * 100).toFixed(2)),
             count: Math.round(groupBSize * groupBRate),
             total: groupBSize,
@@ -280,12 +248,12 @@
 
         const getSignificanceColor = (pValue) => {
           if (pValue < 0.001)
-            return "text-green-700 bg-green-100";
+            return "border border-[#C28E0E] bg-[#C28E0E]/30 text-[#000000]";
           if (pValue < 0.01)
-            return "text-green-600 bg-green-50";
+            return "border border-[#C28E0E]/80 bg-[#C28E0E]/20 text-[#000000]";
           if (pValue < 0.05)
-            return "text-yellow-700 bg-yellow-100";
-          return "text-red-600 bg-red-50";
+            return "border border-[#CEB888]/70 bg-[#CEB888]/25 text-[#000000]";
+          return "border border-[#9D968D]/60 bg-[#9D968D]/20 text-[#373A36]";
         };
 
         const getInterpretation = () => {
@@ -561,90 +529,40 @@
             rate: findRateThreshold(),
             sampleSize: findSampleSizeThreshold(),
           };
-        }, [
-          results,
-          groupASize,
-          groupBSize,
-          groupARate,
-          groupBRate,
-          significanceLevel,
-        ]);
+        }, [results, groupASize, groupBSize, groupARate, groupBRate]);
 
         return (
-          <div className="p-6 max-w-7xl mx-auto bg-gray-50 min-h-screen">
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                A/B Testing Dashboard
+          <div className="p-6 max-w-7xl mx-auto bg-white min-h-screen">
+            <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6 mb-6">
+              <h1 className="text-3xl font-bold text-[#000000] mb-3">
+                Impact of sample size on hypothesis testing v2
               </h1>
-              <p className="text-gray-600">
-                Interactive statistical learning tool for hypothesis
-                testing
+              <p className="text-base text-[#373A36]">
+                This interactive email campaign experiment illustrates how
+                changing the size of each sample alters statistical power,
+                confidence intervals, and the likelihood of detecting
+                meaningful differences between two subject lines.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">
-                    Test Configuration
+                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                    {scenarioDetails.title}
                   </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Test Scenario
-                      </label>
-                      <select
-                        value={scenario}
-                        onChange={(e) => setScenario(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      >
-                        {Object.entries(scenarios).map(
-                          ([key, value]) => (
-                            <option key={key} value={key}>
-                              {value.title}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Significance Level (α)
-                      </label>
-                      <select
-                        value={significanceLevel}
-                        onChange={(e) =>
-                          setSignificanceLevel(
-                            parseFloat(e.target.value)
-                          )
-                        }
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value={0.1}>0.10 (10%)</option>
-                        <option value={0.05}>0.05 (5%)</option>
-                        <option value={0.01}>0.01 (1%)</option>
-                      </select>
-                    </div>
-
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h3 className="font-semibold text-blue-800">
-                        {scenarios[scenario].title}
-                      </h3>
-                      <p className="text-blue-700 text-sm">
-                        {scenarios[scenario].description}
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-[#373A36]">
+                    {scenarioDetails.description}
+                  </p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-blue-600">
-                    Group A: {scenarios[scenario].groupALabel}
+                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                    Group A: {scenarioDetails.groupALabel}
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-[#373A36] mb-2">
                         Sample Size
                       </label>
                       <input
@@ -657,12 +575,12 @@
                         }
                         min="50"
                         max="10000"
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {scenarios[scenario].metric} (%)
+                      <label className="block text-sm font-medium text-[#373A36] mb-2">
+                        {scenarioDetails.metric} (%)
                       </label>
                       <input
                         type="number"
@@ -675,16 +593,16 @@
                         min="0"
                         max="100"
                         step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
                       />
                     </div>
-                    <div className="bg-blue-50 p-3 rounded">
-                      <p className="text-sm text-blue-700">
+                    <div className="bg-[#CEB888]/20 p-3 rounded">
+                      <p className="text-sm text-[#373A36]">
                         <strong>Conversions:</strong>{" "}
                         {Math.round(groupASize * groupARate)} out of{" "}
                         {groupASize}
                       </p>
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-[#373A36]">
                         <strong>Rate:</strong>{" "}
                         {(groupARate * 100).toFixed(2)}%
                       </p>
@@ -692,13 +610,13 @@
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-green-600">
-                    Group B: {scenarios[scenario].groupBLabel}
+                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                    Group B: {scenarioDetails.groupBLabel}
                   </h2>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-[#373A36] mb-2">
                         Sample Size
                       </label>
                       <input
@@ -711,12 +629,12 @@
                         }
                         min="50"
                         max="10000"
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {scenarios[scenario].metric} (%)
+                      <label className="block text-sm font-medium text-[#373A36] mb-2">
+                        {scenarioDetails.metric} (%)
                       </label>
                       <input
                         type="number"
@@ -729,16 +647,16 @@
                         min="0"
                         max="100"
                         step="0.1"
-                        className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
                       />
                     </div>
-                    <div className="bg-green-50 p-3 rounded">
-                      <p className="text-sm text-green-700">
+                    <div className="bg-[#C28E0E]/15 p-3 rounded">
+                      <p className="text-sm text-[#373A36]">
                         <strong>Conversions:</strong>{" "}
                         {Math.round(groupBSize * groupBRate)} out of{" "}
                         {groupBSize}
                       </p>
-                      <p className="text-sm text-green-700">
+                      <p className="text-sm text-[#373A36]">
                         <strong>Rate:</strong>{" "}
                         {(groupBRate * 100).toFixed(2)}%
                       </p>
@@ -746,11 +664,11 @@
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-semibold mb-4">
+                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
                     Learning Notes
                   </h2>
-                  <div className="space-y-3 text-sm text-gray-700">
+                  <div className="space-y-3 text-sm text-[#373A36]">
                     <p>
                       <strong>P-Value:</strong> The probability of
                       observing this difference (or more extreme) if
@@ -778,28 +696,28 @@
               <div className="space-y-6">
                 {results && (
                   <>
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h2 className="text-xl font-semibold mb-4">
+                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                      <h2 className="text-xl font-semibold mb-4 text-[#000000]">
                         Visualization
                       </h2>
                       <div className="h-64">
                         <SimpleBarChart
                           data={chartData}
-                          metricLabel={scenarios[scenario].metric}
+                          metricLabel={scenarioDetails.metric}
                         />
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h2 className="text-xl font-semibold mb-4">
+                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                      <h2 className="text-xl font-semibold mb-4 text-[#000000]">
                         Test Results
                       </h2>
 
                       <div
-                        className={`p-4 rounded-lg mb-6 ${
+                        className={`p-4 rounded-lg mb-6 border ${
                           results.isSignificant
-                            ? "bg-green-50 border border-green-200"
-                            : "bg-red-50 border border-red-200"
+                            ? "bg-[#C28E0E]/20 border-[#C28E0E]/60 text-[#000000]"
+                            : "bg-[#9D968D]/15 border-[#9D968D]/40 text-[#373A36]"
                         }`}
                       >
                         <p className="font-medium text-lg">
@@ -808,11 +726,11 @@
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div className="bg-gray-50 p-4 rounded-lg text-center">
-                          <h3 className="font-semibold text-gray-700 mb-1">
+                        <div className="bg-[#CEB888]/20 p-4 rounded-lg text-center border border-[#CEB888]/40">
+                          <h3 className="font-semibold text-[#373A36] mb-1">
                             Z-Statistic
                           </h3>
-                          <p className="text-3xl font-bold text-blue-600">
+                          <p className="text-3xl font-bold text-[#000000]">
                             {results.zStat.toFixed(3)}
                           </p>
                         </div>
@@ -822,124 +740,52 @@
                             results.pValue
                           )}`}
                         >
-                          <h3 className="font-semibold mb-1">P-Value</h3>
-                          <p className="text-3xl font-bold">
+                          <h3 className="font-semibold mb-1 text-[#000000]">
+                            P-Value
+                          </h3>
+                          <p className="text-3xl font-bold text-[#000000]">
                             {results.pValue.toFixed(4)}
                           </p>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg text-center">
-                          <h3 className="font-semibold text-gray-700 mb-1">
+                        <div className="bg-white border border-[#9D968D]/40 p-4 rounded-lg text-center">
+                          <h3 className="font-semibold text-[#373A36] mb-1">
                             Effect Size
                           </h3>
-                          <p className="text-3xl font-bold text-purple-600">
+                          <p className="text-3xl font-bold text-[#000000]">
                             {results.effectSizePercent.toFixed(2)}%
                           </p>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-lg text-center">
-                          <h3 className="font-semibold text-gray-700 mb-1">
+                        <div className="bg-white border border-[#9D968D]/40 p-4 rounded-lg text-center">
+                          <h3 className="font-semibold text-[#373A36] mb-1">
                             Statistical Power
                           </h3>
-                          <p className="text-3xl font-bold text-orange-600">
+                          <p className="text-3xl font-bold text-[#000000]">
                             {(results.power * 100).toFixed(1)}%
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h2 className="text-xl font-semibold mb-4">
-                        Statistical Details
-                      </h2>
-
-                      <div className="space-y-4">
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                          <h3 className="font-semibold text-blue-800 mb-2">
-                            Hypothesis Test Setup
-                          </h3>
-                          <p className="text-blue-700 text-sm">
-                            <strong>H₀:</strong> p₁ = p₂ (No difference
-                            between groups)
-                          </p>
-                          <p className="text-blue-700 text-sm">
-                            <strong>H₁:</strong> p₁ ≠ p₂ (There is a
-                            difference between groups)
-                          </p>
-                          <p className="text-blue-700 text-sm">
-                            <strong>Significance Level:</strong> α ={" "}
-                            {significanceLevel}
-                          </p>
-                        </div>
-
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h3 className="font-semibold text-gray-700 mb-2">
-                            Confidence Interval (95%)
-                          </h3>
-                          <p className="text-gray-700 text-sm">
-                            The true difference is likely between{" "}
-                            <strong>
-                              {results.ciLower.toFixed(2)}%
-                            </strong>{" "}
-                            and{" "}
-                            <strong>
-                              {results.ciUpper.toFixed(2)}%
-                            </strong>
-                          </p>
-                          {results.ciLower <= 0 &&
-                            results.ciUpper >= 0 && (
-                              <p className="text-orange-600 mt-1 text-sm">
-                                ⚠️ The confidence interval includes 0,
-                                suggesting no significant difference.
-                              </p>
-                            )}
-                        </div>
-
-                        <div className="bg-yellow-50 p-4 rounded-lg">
-                          <h3 className="font-semibold text-yellow-800 mb-2">
-                            Key Metrics
-                          </h3>
-                          <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-                            <p className="text-yellow-700">
-                              <strong>Pooled Proportion:</strong>{" "}
-                              {(results.pooledP * 100).toFixed(2)}%
-                            </p>
-                            <p className="text-yellow-700">
-                              <strong>Standard Error:</strong>{" "}
-                              {results.se.toFixed(4)}
-                            </p>
-                            <p className="text-yellow-700">
-                              <strong>Group A Rate:</strong>{" "}
-                              {(results.p1 * 100).toFixed(2)}%
-                            </p>
-                            <p className="text-yellow-700">
-                              <strong>Group B Rate:</strong>{" "}
-                              {(results.p2 * 100).toFixed(2)}%
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg shadow-lg p-6">
-                      <h2 className="text-xl font-semibold mb-4">
+                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                      <h2 className="text-xl font-semibold mb-4 text-[#000000]">
                         Switching Threshold Insights
                       </h2>
-                      <p className="text-sm text-gray-600 mb-4">
-                        Discover how much you would need to adjust one
-                        factor while holding the other constant to
-                        flip the current conclusion of the test.
+                      <p className="text-sm text-[#373A36] mb-4">
+                        Discover how much you would need to adjust one factor
+                        while holding the other constant to flip the current
+                        conclusion of the test.
                       </p>
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div className="border border-blue-100 rounded-lg p-4 bg-blue-50/50">
-                          <h3 className="font-semibold text-blue-800 mb-2">
+                        <div className="border border-[#C28E0E]/50 rounded-lg p-4 bg-[#C28E0E]/15">
+                          <h3 className="font-semibold text-[#000000] mb-2">
                             Adjust Group B Rate
                           </h3>
                           {switchInsights.rate ? (
-                            <div className="text-sm text-blue-700 space-y-2">
+                            <div className="text-sm text-[#373A36] space-y-2">
                               <p>
-                                {switchInsights.rate.direction ===
-                                "increase"
+                                {switchInsights.rate.direction === "increase"
                                   ? "Increase"
                                   : "Decrease"}{" "}
                                 Group B's rate to{" "}
@@ -956,14 +802,14 @@
                                   ? "statistically significant."
                                   : "not statistically significant."}
                               </p>
-                              <p className="text-xs text-blue-600">
+                              <p className="text-xs text-[#373A36]">
                                 Current rate: {(groupBRate * 100).toFixed(2)}%
                                 · Change of{" "}
                                 {(switchInsights.rate.delta * 100).toFixed(2)}%
                               </p>
                             </div>
                           ) : (
-                            <p className="text-sm text-blue-700">
+                            <p className="text-sm text-[#373A36]">
                               Unable to find a rate adjustment within the
                               0%–100% range that would reverse the current
                               conclusion.
@@ -971,12 +817,12 @@
                           )}
                         </div>
 
-                        <div className="border border-green-100 rounded-lg p-4 bg-green-50/50">
-                          <h3 className="font-semibold text-green-800 mb-2">
+                        <div className="border border-[#9D968D]/60 rounded-lg p-4 bg-[#CEB888]/20">
+                          <h3 className="font-semibold text-[#000000] mb-2">
                             Adjust Sample Sizes
                           </h3>
                           {switchInsights.sampleSize ? (
-                            <div className="text-sm text-green-700 space-y-2">
+                            <div className="text-sm text-[#373A36] space-y-2">
                               <p>
                                 {switchInsights.sampleSize.direction ===
                                 "increase"
@@ -1002,20 +848,91 @@
                                 </strong>{" "}
                                 and flip the statistical conclusion.
                               </p>
-                              <p className="text-xs text-green-600">
+                              <p className="text-xs text-[#373A36]">
                                 Scale factor: ×
                                 {switchInsights.sampleSize.scale.toFixed(2)} ·
-                                Current sizes: {groupASize.toLocaleString()} vs
-                                {" "}
+                                Current sizes: {groupASize.toLocaleString()} vs{" "}
                                 {groupBSize.toLocaleString()}
                               </p>
                             </div>
                           ) : (
-                            <p className="text-sm text-green-700">
+                            <p className="text-sm text-[#373A36]">
                               Unable to identify sample sizes within practical
                               bounds that would reverse the current outcome.
                             </p>
                           )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                      <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                        Statistical Details
+                      </h2>
+
+                      <div className="space-y-4">
+                        <div className="bg-[#CEB888]/20 p-4 rounded-lg border border-[#CEB888]/40">
+                          <h3 className="font-semibold text-[#000000] mb-2">
+                            Hypothesis Test Setup
+                          </h3>
+                          <p className="text-sm text-[#373A36]">
+                            <strong>H₀:</strong> p₁ = p₂ (No difference between
+                            groups)
+                          </p>
+                          <p className="text-sm text-[#373A36]">
+                            <strong>H₁:</strong> p₁ ≠ p₂ (There is a difference
+                            between groups)
+                          </p>
+                          <p className="text-sm text-[#373A36]">
+                            <strong>Significance Level:</strong> α = {" "}
+                            {significanceLevel}
+                          </p>
+                        </div>
+
+                        <div className="bg-white border border-[#9D968D]/40 p-4 rounded-lg">
+                          <h3 className="font-semibold text-[#000000] mb-2">
+                            Confidence Interval (95%)
+                          </h3>
+                          <p className="text-sm text-[#373A36]">
+                            The true difference is likely between{" "}
+                            <strong>
+                              {results.ciLower.toFixed(2)}%
+                            </strong>{" "}
+                            and{" "}
+                            <strong>
+                              {results.ciUpper.toFixed(2)}%
+                            </strong>
+                          </p>
+                          {results.ciLower <= 0 && results.ciUpper >= 0 && (
+                            <p className="text-xs text-[#373A36] mt-1">
+                              ⚠️ The confidence interval includes 0,
+                              suggesting no significant difference.
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="bg-[#C28E0E]/15 p-4 rounded-lg border border-[#C28E0E]/40">
+                          <h3 className="font-semibold text-[#000000] mb-2">
+                            Key Metrics
+                          </h3>
+                          <div className="grid grid-cols-1 gap-2 text-sm text-[#373A36] sm:grid-cols-2">
+                            <p>
+                              <strong>Pooled Proportion:</strong>{" "}
+                              {(results.pooledP * 100).toFixed(2)}%
+                            </p>
+                            <p>
+                              <strong>Standard Error:</strong>{" "}
+                              {results.se.toFixed(4)}
+                            </p>
+                            <p>
+                              <strong>Group A Rate:</strong>{" "}
+                              {(results.p1 * 100).toFixed(2)}%
+                            </p>
+                            <p>
+                              <strong>Group B Rate:</strong>{" "}
+                              {(results.p2 * 100).toFixed(2)}%
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
