@@ -10,33 +10,24 @@
     />
     <style>
       :root {
-        color-scheme: light dark;
-        --bg: #0f172a;
-        --panel-bg: rgba(255, 255, 255, 0.08);
-        --card-bg: rgba(15, 23, 42, 0.75);
-        --text: #f8fafc;
-        --accent: #38bdf8;
-        --accent-strong: #0ea5e9;
+        --bg: #ffffff;
+        --surface: #f6f4ee;
+        --panel-bg: rgba(206, 184, 136, 0.16);
+        --card-bg: rgba(255, 255, 255, 0.96);
+        --text: #000000;
+        --text-secondary: #373a36;
+        --accent: #c28e0e;
+        --accent-strong: #8f6a0a;
+        --accent-soft: #ceb888;
+        --border: #9d968d;
+        --shadow: rgba(55, 58, 54, 0.18);
         --grid-gap: clamp(1rem, 2vw, 1.5rem);
-      }
-
-      @media (prefers-color-scheme: light) {
-        :root {
-          --bg: #f8fafc;
-          --panel-bg: rgba(148, 163, 184, 0.15);
-          --card-bg: rgba(255, 255, 255, 0.9);
-          --text: #0f172a;
-          --accent: #0284c7;
-          --accent-strong: #0c4a6e;
-        }
       }
 
       body {
         margin: 0;
         font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent 45%),
-          radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.2), transparent 35%),
-          var(--bg);
+        background: linear-gradient(135deg, rgba(206, 184, 136, 0.22), rgba(255, 255, 255, 0.95));
         color: var(--text);
         min-height: 100vh;
         padding: clamp(1.5rem, 2.5vw, 3rem);
@@ -60,7 +51,7 @@
         text-align: center;
         font-size: 1rem;
         line-height: 1.5;
-        opacity: 0.85;
+        color: var(--text-secondary);
       }
 
       .grid {
@@ -73,10 +64,11 @@
         gap: 1rem;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         background: var(--panel-bg);
+        border: 1px solid rgba(157, 150, 141, 0.4);
         padding: 1.25rem clamp(1rem, 2vw, 1.5rem);
         border-radius: 1rem;
-        backdrop-filter: blur(14px);
-        box-shadow: 0 15px 45px rgba(15, 23, 42, 0.25);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 38px var(--shadow);
       }
 
       .control {
@@ -88,30 +80,32 @@
       .control label {
         font-weight: 600;
         font-size: 0.95rem;
+        color: var(--text-secondary);
       }
 
       .control input,
       .control button {
         border-radius: 0.6rem;
-        border: 1px solid rgba(148, 163, 184, 0.3);
+        border: 1px solid var(--border);
         padding: 0.65rem 0.75rem;
         font-size: 1rem;
-        background: rgba(15, 23, 42, 0.55);
-        color: inherit;
+        background: #ffffff;
+        color: var(--text);
       }
 
       .control button {
         cursor: pointer;
         font-weight: 600;
         background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-        color: white;
+        color: #ffffff;
         border: none;
         transition: transform 0.15s ease, box-shadow 0.2s ease;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
       }
 
       .control button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 12px 22px rgba(56, 189, 248, 0.35);
+        box-shadow: 0 18px 32px rgba(0, 0, 0, 0.22);
       }
 
       .panels {
@@ -123,10 +117,11 @@
 
       .panel {
         background: var(--card-bg);
+        border: 1px solid rgba(157, 150, 141, 0.35);
         border-radius: 1rem;
         padding: clamp(1rem, 2vw, 1.5rem);
-        backdrop-filter: blur(18px);
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 22px 40px var(--shadow);
         display: flex;
         flex-direction: column;
         gap: 1rem;
@@ -135,6 +130,7 @@
       .panel h2 {
         font-size: 1.25rem;
         margin-bottom: 0.5rem;
+        color: var(--text);
       }
 
       .stats-grid {
@@ -144,27 +140,24 @@
       }
 
       .stat {
-        background: rgba(148, 163, 184, 0.12);
+        background: rgba(206, 184, 136, 0.16);
         border-radius: 0.75rem;
         padding: 0.75rem;
+        border: 1px solid rgba(157, 150, 141, 0.3);
       }
 
       .stat .label {
         font-size: 0.8rem;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        opacity: 0.75;
+        color: var(--text-secondary);
       }
 
       .stat .value {
         font-size: 1.2rem;
         font-weight: 600;
         margin-top: 0.3rem;
-      }
-
-      canvas {
-        width: 100% !important;
-        height: auto !important;
+        color: var(--text);
       }
 
       .threshold-info {
@@ -181,7 +174,7 @@
         max-height: 320px;
         overflow: auto;
         border-radius: 0.75rem;
-        border: 1px solid rgba(148, 163, 184, 0.15);
+        border: 1px solid rgba(157, 150, 141, 0.25);
       }
 
       table {
@@ -194,25 +187,26 @@
         position: sticky;
         top: 0;
         backdrop-filter: blur(12px);
-        background: rgba(15, 23, 42, 0.85);
+        background: var(--accent);
+        color: #ffffff;
       }
 
       th,
       td {
         padding: 0.6rem 0.75rem;
         text-align: left;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        border-bottom: 1px solid rgba(157, 150, 141, 0.25);
       }
 
       tbody tr:nth-child(even) {
-        background: rgba(148, 163, 184, 0.07);
+        background: rgba(206, 184, 136, 0.12);
       }
 
       .score-list {
         max-height: 220px;
         overflow: auto;
         border-radius: 0.75rem;
-        border: 1px solid rgba(148, 163, 184, 0.15);
+        border: 1px solid rgba(157, 150, 141, 0.25);
         padding: 0.75rem;
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
@@ -221,8 +215,8 @@
       }
 
       .score-badge {
-        background: rgba(56, 189, 248, 0.18);
-        color: rgba(15, 23, 42, 0.9);
+        background: rgba(206, 184, 136, 0.35);
+        color: var(--text);
         border-radius: 999px;
         padding: 0.35rem 0.6rem;
         text-align: center;
@@ -238,6 +232,24 @@
           grid-template-columns: 1fr;
         }
       }
+
+      input[type='range'] {
+        accent-color: var(--accent);
+      }
+
+      .threshold-info {
+        color: var(--text-secondary);
+      }
+
+      .threshold-info strong {
+        color: var(--text);
+      }
+
+      .bell-curve-chart {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -246,10 +258,8 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
     <script type="text/babel">
-      const { useState, useMemo, useEffect, useRef } = React;
+      const { useState, useMemo, useEffect } = React;
 
       const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -332,10 +342,214 @@
         return sign * y;
       };
 
-      const formatNumber = (value, decimals = 2) => value.toLocaleString(undefined, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
+      const createLinePath = (points, xScale, yScale) => {
+        if (!points.length) {
+          return '';
+        }
+
+        return points
+          .map((point, index) => {
+            const x = xScale(point.x).toFixed(2);
+            const y = yScale(point.y).toFixed(2);
+            return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+          })
+          .join(' ');
+      };
+
+      const createAreaPath = (points, xScale, yScale, baselineY) => {
+        if (!points.length) {
+          return '';
+        }
+
+        const commands = [`M ${xScale(points[0].x).toFixed(2)} ${baselineY.toFixed(2)}`];
+
+        points.forEach((point) => {
+          commands.push(`L ${xScale(point.x).toFixed(2)} ${yScale(point.y).toFixed(2)}`);
+        });
+
+        const lastPoint = points[points.length - 1];
+        commands.push(`L ${xScale(lastPoint.x).toFixed(2)} ${baselineY.toFixed(2)}`, 'Z');
+
+        return commands.join(' ');
+      };
+
+      const BellCurveChart = ({ stats, threshold }) => {
+        const chart = useMemo(() => {
+          if (!stats) {
+            return null;
+          }
+
+          const width = 700;
+          const height = 320;
+          const margins = { top: 20, right: 24, bottom: 48, left: 56 };
+          const innerWidth = width - margins.left - margins.right;
+          const innerHeight = height - margins.top - margins.bottom;
+          const xUpperBound = Math.max(100, Math.ceil((stats.max + 5) / 5) * 5);
+          const points = [];
+
+          for (let x = 0; x <= xUpperBound; x += 1) {
+            points.push({ x, y: normalPdf(x, stats.mean, stats.stdDev) });
+          }
+
+          const maxDensity = points.reduce((max, point) => Math.max(max, point.y), 0);
+          const yMax = maxDensity * 1.1;
+          const baselineY = margins.top + innerHeight;
+          const xScale = (value) => margins.left + (value / xUpperBound) * innerWidth;
+          const yScale = (value) => baselineY - (value / yMax) * innerHeight;
+          const thresholdDensity = normalPdf(threshold, stats.mean, stats.stdDev);
+          const leftPoints = points.filter((point) => point.x <= threshold);
+          const rightPoints = points.filter((point) => point.x >= threshold);
+
+          if (!leftPoints.some((point) => point.x === threshold)) {
+            leftPoints.push({ x: threshold, y: thresholdDensity });
+          }
+
+          if (!rightPoints.some((point) => point.x === threshold)) {
+            rightPoints.unshift({ x: threshold, y: thresholdDensity });
+          }
+
+          const xTicks = [];
+          for (let tick = 0; tick <= xUpperBound; tick += 10) {
+            xTicks.push({ value: tick, x: xScale(tick) });
+          }
+
+          const yTicks = [];
+          const yStep = yMax / 4;
+          for (let index = 0; index <= 4; index += 1) {
+            const value = index * yStep;
+            yTicks.push({ value, y: yScale(value) });
+          }
+
+          return {
+            width,
+            height,
+            margins,
+            baselineY,
+            curvePath: createLinePath(points, xScale, yScale),
+            leftAreaPath: createAreaPath(leftPoints, xScale, yScale, baselineY),
+            rightAreaPath: createAreaPath(rightPoints, xScale, yScale, baselineY),
+            thresholdX: xScale(threshold),
+            xTicks,
+            yTicks,
+          };
+        }, [stats, threshold]);
+
+        if (!chart) {
+          return null;
+        }
+
+        const axisWidth = chart.width - chart.margins.left - chart.margins.right;
+        const axisHeight = chart.height - chart.margins.top - chart.margins.bottom;
+
+        return (
+          <svg
+            className="bell-curve-chart"
+            viewBox={`0 0 ${chart.width} ${chart.height}`}
+            role="img"
+            aria-labelledby="bell-curve-title bell-curve-desc"
+          >
+            <title id="bell-curve-title">Bell curve of simulated scores</title>
+            <desc id="bell-curve-desc">
+              Normal distribution of generated scores with highlighted areas below and above the selected threshold.
+            </desc>
+            <rect
+              x={chart.margins.left}
+              y={chart.margins.top}
+              width={axisWidth}
+              height={axisHeight}
+              fill="rgba(206, 184, 136, 0.08)"
+              stroke="rgba(157, 150, 141, 0.35)"
+            />
+            {chart.leftAreaPath && <path d={chart.leftAreaPath} fill="rgba(206, 184, 136, 0.5)" />}
+            {chart.rightAreaPath && <path d={chart.rightAreaPath} fill="rgba(194, 142, 14, 0.45)" />}
+            <path
+              d={chart.curvePath}
+              fill="none"
+              stroke="var(--accent-strong)"
+              strokeWidth="3"
+              strokeLinejoin="round"
+            />
+            <line
+              x1={chart.thresholdX}
+              x2={chart.thresholdX}
+              y1={chart.margins.top}
+              y2={chart.baselineY}
+              stroke="var(--text)"
+              strokeWidth="2"
+              strokeDasharray="6 6"
+            />
+            <line
+              x1={chart.margins.left}
+              y1={chart.baselineY}
+              x2={chart.margins.left + axisWidth}
+              y2={chart.baselineY}
+              stroke="var(--border)"
+              strokeWidth="1.5"
+            />
+            <line
+              x1={chart.margins.left}
+              y1={chart.margins.top}
+              x2={chart.margins.left}
+              y2={chart.baselineY}
+              stroke="var(--border)"
+              strokeWidth="1.5"
+            />
+            {chart.xTicks.map((tick) => (
+              <g key={tick.value} transform={`translate(${tick.x}, ${chart.baselineY})`}>
+                <line y2="6" stroke="var(--border)" strokeWidth="1" />
+                <text
+                  y="22"
+                  textAnchor="middle"
+                  fontSize="12"
+                  fill="var(--text-secondary)"
+                  fontWeight="500"
+                >
+                  {tick.value}
+                </text>
+              </g>
+            ))}
+            {chart.yTicks.map((tick, index) => (
+              <g key={index} transform={`translate(${chart.margins.left}, ${tick.y})`}>
+                <line x1="-6" stroke="var(--border)" strokeWidth="1" />
+                <text
+                  x="-10"
+                  textAnchor="end"
+                  fontSize="12"
+                  fill="var(--text-secondary)"
+                  dominantBaseline="middle"
+                >
+                  {tick.value.toFixed(3)}
+                </text>
+              </g>
+            ))}
+            <text
+              x={chart.margins.left + axisWidth / 2}
+              y={chart.height - 12}
+              textAnchor="middle"
+              fontSize="13"
+              fill="var(--text-secondary)"
+            >
+              Score
+            </text>
+            <text
+              x="20"
+              y={chart.margins.top + axisHeight / 2}
+              textAnchor="middle"
+              fontSize="13"
+              fill="var(--text-secondary)"
+              transform={`rotate(-90 20 ${chart.margins.top + axisHeight / 2})`}
+            >
+              Probability Density
+            </text>
+          </svg>
+        );
+      };
+
+      const formatNumber = (value, decimals = 2) =>
+        value.toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        });
 
       const generateZTable = () => {
         const rows = [];
@@ -355,176 +569,10 @@
         const [stdDev, setStdDev] = useState(10);
         const [scores, setScores] = useState([]);
         const [threshold, setThreshold] = useState(70);
-        const chartRef = useRef(null);
-        const chartInstanceRef = useRef(null);
 
         const stats = useMemo(() => computeStats(scores), [scores]);
 
         const zTable = useMemo(() => generateZTable(), []);
-
-        const chartData = useMemo(() => {
-          if (!stats) {
-            return null;
-          }
-
-          const xValues = [];
-          const pdfValues = [];
-          for (let x = 0; x <= 100; x += 1) {
-            xValues.push(x);
-            pdfValues.push(normalPdf(x, stats.mean, stats.stdDev));
-          }
-
-          const points = xValues.map((x, index) => ({ x, y: pdfValues[index] }));
-          const leftShaded = [];
-          const rightShaded = [];
-
-          points.forEach((point) => {
-            if (point.x <= threshold) {
-              leftShaded.push(point);
-            }
-            if (point.x >= threshold) {
-              rightShaded.push(point);
-            }
-          });
-
-          if (leftShaded.length) {
-            leftShaded.unshift({ x: leftShaded[0].x, y: 0 });
-            if (leftShaded[leftShaded.length - 1].x !== threshold) {
-              const pdfAtThreshold = normalPdf(threshold, stats.mean, stats.stdDev);
-              leftShaded.push({ x: threshold, y: pdfAtThreshold });
-            }
-            leftShaded.push({ x: threshold, y: 0 });
-          }
-
-          if (rightShaded.length) {
-            rightShaded.unshift({ x: threshold, y: 0 });
-            if (rightShaded[1] && rightShaded[1].x !== threshold) {
-              const pdfAtThreshold = normalPdf(threshold, stats.mean, stats.stdDev);
-              rightShaded.splice(1, 0, { x: threshold, y: pdfAtThreshold });
-            }
-            rightShaded.push({ x: rightShaded[rightShaded.length - 1].x, y: 0 });
-          }
-
-          return {
-            points,
-            leftShaded,
-            rightShaded,
-            yMax: Math.max(...pdfValues) * 1.1,
-          };
-        }, [stats, threshold]);
-
-        useEffect(() => {
-          if (!chartRef.current || !chartData) {
-            return;
-          }
-
-          const ctx = chartRef.current.getContext('2d');
-
-          if (!chartInstanceRef.current) {
-            chartInstanceRef.current = new Chart(ctx, {
-              type: 'scatter',
-              data: {
-                datasets: [],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    type: 'linear',
-                    beginAtZero: true,
-                    title: {
-                      display: true,
-                      text: 'Score',
-                    },
-                    suggestedMax: 100,
-                  },
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: (value) => value.toFixed(3),
-                    },
-                    title: {
-                      display: true,
-                      text: 'Probability Density',
-                    },
-                  },
-                },
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                  tooltip: {
-                    callbacks: {
-                      label: (context) => `Score ${context.parsed.x}: ${context.parsed.y.toFixed(4)}`,
-                    },
-                  },
-                },
-              },
-            });
-          }
-
-          const chart = chartInstanceRef.current;
-          chart.data.datasets = [
-            {
-              label: 'Normal Curve',
-              data: chartData.points,
-              showLine: true,
-              parsing: false,
-              borderColor: 'rgba(56, 189, 248, 1)',
-              borderWidth: 3,
-              pointRadius: 0,
-              tension: 0.25,
-              fill: false,
-            },
-            {
-              label: 'Below Threshold',
-              data: chartData.leftShaded,
-              showLine: true,
-              parsing: false,
-              borderColor: 'rgba(56, 189, 248, 0)',
-              backgroundColor: 'rgba(56, 189, 248, 0.35)',
-              pointRadius: 0,
-              spanGaps: false,
-              fill: 'origin',
-            },
-            {
-              label: 'Above Threshold',
-              data: chartData.rightShaded,
-              showLine: true,
-              parsing: false,
-              borderColor: 'rgba(251, 191, 36, 0)',
-              backgroundColor: 'rgba(251, 191, 36, 0.3)',
-              pointRadius: 0,
-              spanGaps: false,
-              fill: 'origin',
-            },
-            {
-              label: 'Threshold',
-              data: [
-                { x: threshold, y: 0 },
-                { x: threshold, y: chartData.yMax },
-              ],
-              showLine: true,
-              parsing: false,
-              borderColor: 'rgba(239, 68, 68, 1)',
-              borderDash: [6, 6],
-              borderWidth: 2,
-              pointRadius: 0,
-            },
-          ];
-
-          chart.options.scales.x.suggestedMax = Math.max(100, stats.max + 5);
-          chart.options.scales.y.suggestedMax = chartData.yMax;
-          chart.update();
-        }, [chartData, stats, threshold]);
-
-        useEffect(() => () => {
-          if (chartInstanceRef.current) {
-            chartInstanceRef.current.destroy();
-            chartInstanceRef.current = null;
-          }
-        }, []);
 
         const handleGenerate = () => {
           const generated = generateNormalSamples(count, mean, stdDev);
@@ -599,7 +647,7 @@
                 <div className="panel" style={{ minHeight: '420px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <h2>Bell Curve Distribution</h2>
-                    <p style={{ margin: 0, opacity: 0.8 }}>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
                       Use the slider to position the threshold and observe the portion of the class above or below that grade.
                     </p>
                   </div>
@@ -619,7 +667,7 @@
                     <strong>{formatNumber(percentAbove)}% of students scored above {threshold}.</strong>
                   </div>
                   <div style={{ flex: 1, minHeight: '260px', position: 'relative' }}>
-                    <canvas ref={chartRef} />
+                    <BellCurveChart stats={stats} threshold={threshold} />
                   </div>
                 </div>
 
@@ -675,7 +723,7 @@
 
                 <div className="panel">
                   <h2>Normal Distribution Table</h2>
-                  <p style={{ margin: 0, opacity: 0.8 }}>
+                  <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
                     Use this table to find the cumulative probability for z-scores from -3 to 3.
                   </p>
                   <div className="table-wrapper">
