@@ -92,8 +92,8 @@
       };
 
       const ABTestingDashboard = () => {
-        const [groupASize, setGroupASize] = useState(1000);
-        const [groupBSize, setGroupBSize] = useState(1000);
+        const [groupASize, setGroupASize] = useState(500);
+        const [groupBSize, setGroupBSize] = useState(500);
         const [groupARate, setGroupARate] = useState(0.12);
         const [groupBRate, setGroupBRate] = useState(0.15);
         const [results, setResults] = useState(null);
@@ -547,15 +547,6 @@
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="space-y-6">
-                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
-                    {scenarioDetails.title}
-                  </h2>
-                  <p className="text-sm text-[#373A36]">
-                    {scenarioDetails.description}
-                  </p>
-                </div>
-
                 <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
                   <h2 className="text-xl font-semibold mb-4 text-[#000000]">
                     Group A: {scenarioDetails.groupALabel}
