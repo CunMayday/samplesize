@@ -91,6 +91,313 @@
         );
       };
 
+      const ConversionLiftChart = ({
+        series,
+        groupALabel,
+        groupBLabel,
+      }) => {
+        if (!series || series.length === 0) {
+          return (
+            <div className="flex h-64 items-center justify-center text-[#9D968D]">
+              Not enough data to render the chart
+            </div>
+          );
+        }
+
+        const width = 680;
+        const height = 340;
+        const margin = { top: 24, right: 24, bottom: 56, left: 64 };
+
+        const sampleSizes = series.map((point) => point.sampleSize);
+        const minSample = Math.min(...sampleSizes);
+        const maxSample = Math.max(...sampleSizes);
+
+        const allValues = series.flatMap((point) => [
+          point.aLower,
+          point.aUpper,
+          point.bLower,
+          point.bUpper,
+        ]);
+        const minValue = Math.min(...allValues);
+        const maxValue = Math.max(...allValues);
+
+        const chartHeight = height - margin.top - margin.bottom;
+        const chartWidth = width - margin.left - margin.right;
+
+        const xScale = (value) => {
+          if (maxSample === minSample) {
+            return margin.left + chartWidth / 2;
+          }
+          return (
+            margin.left +
+            ((value - minSample) / (maxSample - minSample)) * chartWidth
+          );
+        };
+
+        const yScale = (value) => {
+          const safeMax = maxValue === minValue ? minValue + 1 : maxValue;
+          return (
+            margin.top +
+            chartHeight -
+            ((value - minValue) / (safeMax - minValue)) * chartHeight
+          );
+        };
+
+        const formatSampleLabel = (point) =>
+          `${point.nA.toLocaleString()} vs ${point.nB.toLocaleString()}`;
+
+        const buildLinePath = (key) =>
+          series
+            .map((point, index) => {
+              const prefix = index === 0 ? "M" : "L";
+              return `${prefix} ${xScale(point.sampleSize)} ${yScale(point[key])}`;
+            })
+            .join(" ");
+
+        const buildBandPath = (lowerKey, upperKey) => {
+          const upperPath = series.map((point, index) => {
+            const command = index === 0 ? "M" : "L";
+            return `${command} ${xScale(point.sampleSize)} ${yScale(
+              point[upperKey]
+            )}`;
+          });
+
+          const lowerPath = [...series].reverse().map((point) => {
+            return `L ${xScale(point.sampleSize)} ${yScale(point[lowerKey])}`;
+          });
+
+          return [
+            upperPath[0],
+            ...upperPath.slice(1),
+            ...lowerPath,
+            "Z",
+          ].join(" ");
+        };
+
+        const yTicks = 5;
+        const yStep = (maxValue - minValue) / yTicks || 1;
+        const yTickValues = Array.from({ length: yTicks + 1 }, (_, idx) =>
+          minValue + idx * yStep
+        );
+
+        const xTickCandidates = [
+          series[0],
+          series[Math.floor(series.length / 2)],
+          series[series.length - 1],
+        ].filter(Boolean);
+        const xTicks = xTickCandidates.filter(
+          (point, index, arr) =>
+            arr.findIndex((candidate) => candidate.sampleSize === point.sampleSize) ===
+            index
+        );
+
+        return (
+          <div className="overflow-x-auto">
+            <svg
+              viewBox={`0 0 ${width} ${height}`}
+              role="img"
+              aria-label="Conversion rates with confidence intervals as sample sizes change"
+              className="w-full max-w-full"
+            >
+              <defs>
+                <linearGradient id="groupA-band" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#9D968D" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#9D968D" stopOpacity="0.08" />
+                </linearGradient>
+                <linearGradient id="groupB-band" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#C28E0E" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#C28E0E" stopOpacity="0.08" />
+                </linearGradient>
+              </defs>
+
+              {/* Axes */}
+              <line
+                x1={margin.left}
+                y1={height - margin.bottom}
+                x2={width - margin.right}
+                y2={height - margin.bottom}
+                stroke="#D1D5DB"
+                strokeWidth="1"
+              />
+              <line
+                x1={margin.left}
+                y1={margin.top}
+                x2={margin.left}
+                y2={height - margin.bottom}
+                stroke="#D1D5DB"
+                strokeWidth="1"
+              />
+
+              {/* Y-axis grid and labels */}
+              {yTickValues.map((tick) => {
+                const y = yScale(tick);
+                return (
+                  <g key={`y-${tick}`}>
+                    <line
+                      x1={margin.left}
+                      y1={y}
+                      x2={width - margin.right}
+                      y2={y}
+                      stroke="#E5E7EB"
+                      strokeWidth="0.5"
+                    />
+                    <text
+                      x={margin.left - 12}
+                      y={y + 4}
+                      textAnchor="end"
+                      fontSize="12"
+                      fill="#4B5563"
+                    >
+                      {tick.toFixed(1)}%
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* X-axis ticks */}
+              {xTicks.map((point, idx) => {
+                if (!point) return null;
+                const x = xScale(point.sampleSize);
+                return (
+                  <g key={`x-${idx}`}>
+                    <line
+                      x1={x}
+                      y1={height - margin.bottom}
+                      x2={x}
+                      y2={height - margin.bottom + 8}
+                      stroke="#4B5563"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={x}
+                      y={height - margin.bottom + 24}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fill="#4B5563"
+                    >
+                      {point.sampleSize.toLocaleString()}
+                    </text>
+                    <text
+                      x={x}
+                      y={height - margin.bottom + 40}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fill="#6B7280"
+                    >
+                      {formatSampleLabel(point)}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Confidence bands */}
+              <path
+                d={buildBandPath("aLower", "aUpper")}
+                fill="url(#groupA-band)"
+                stroke="none"
+              />
+              <path
+                d={buildBandPath("bLower", "bUpper")}
+                fill="url(#groupB-band)"
+                stroke="none"
+              />
+
+              {/* Lines */}
+              <path
+                d={buildLinePath("aRate")}
+                fill="none"
+                stroke="#4B5563"
+                strokeWidth="2.5"
+              >
+                <title>{groupALabel}</title>
+              </path>
+              <path
+                d={buildLinePath("bRate")}
+                fill="none"
+                stroke="#C28E0E"
+                strokeWidth="2.5"
+              >
+                <title>{groupBLabel}</title>
+              </path>
+
+              {/* Data points */}
+              {series.map((point) => (
+                <g key={`point-${point.nA}-${point.nB}`}>
+                  <circle
+                    cx={xScale(point.sampleSize)}
+                    cy={yScale(point.aRate)}
+                    r={4}
+                    fill="#4B5563"
+                  >
+                    <title>
+                      {`${groupALabel}: ${point.aRate.toFixed(2)}% (±${(
+                        point.aUpper - point.aLower
+                      ).toFixed(2)}%)`}
+                    </title>
+                  </circle>
+                  <circle
+                    cx={xScale(point.sampleSize)}
+                    cy={yScale(point.bRate)}
+                    r={4}
+                    fill="#C28E0E"
+                  >
+                    <title>
+                      {`${groupBLabel}: ${point.bRate.toFixed(2)}% (±${(
+                        point.bUpper - point.bLower
+                      ).toFixed(2)}%)`}
+                    </title>
+                  </circle>
+                </g>
+              ))}
+
+              {/* Axis labels */}
+              <text
+                x={margin.left + chartWidth / 2}
+                y={height - 8}
+                textAnchor="middle"
+                fontSize="14"
+                fill="#111827"
+                fontWeight="500"
+              >
+                Average sample size per group
+              </text>
+              <text
+                x={16}
+                y={margin.top}
+                textAnchor="start"
+                fontSize="14"
+                fill="#111827"
+                fontWeight="500"
+              >
+                Conversion rate (%)
+              </text>
+
+              {/* Legend */}
+              <g transform={`translate(${width - margin.right - 220}, ${margin.top})`}>
+                <rect width="220" height="48" rx="8" fill="#F9FAFB" stroke="#E5E7EB" />
+                <circle cx="24" cy="16" r="6" fill="#4B5563" />
+                <text x="40" y="20" fontSize="12" fill="#111827">
+                  {groupALabel}
+                </text>
+                <rect x="16" y="28" width="16" height="8" fill="url(#groupA-band)" stroke="#4B5563" strokeWidth="0.6" />
+                <text x="40" y="36" fontSize="11" fill="#4B5563">
+                  95% CI
+                </text>
+
+                <circle cx="132" cy="16" r="6" fill="#C28E0E" />
+                <text x="148" y="20" fontSize="12" fill="#111827">
+                  {groupBLabel}
+                </text>
+                <rect x="124" y="28" width="16" height="8" fill="url(#groupB-band)" stroke="#C28E0E" strokeWidth="0.6" />
+                <text x="148" y="36" fontSize="11" fill="#C28E0E">
+                  95% CI
+                </text>
+              </g>
+            </svg>
+          </div>
+        );
+      };
+
       const ABTestingDashboard = () => {
         const [groupASize, setGroupASize] = useState(500);
         const [groupBSize, setGroupBSize] = useState(500);
@@ -103,6 +410,22 @@
           metric: "Open Rate",
           groupALabel: "Current Subject",
           groupBLabel: "New Subject",
+        };
+
+        const computeConfidenceBounds = (rate, sampleSize, zScore = 1.96) => {
+          if (!Number.isFinite(sampleSize) || sampleSize <= 0) {
+            const capped = Math.max(Math.min(rate, 1), 0) * 100;
+            return { lower: capped, upper: capped };
+          }
+
+          const boundedRate = Math.max(Math.min(rate, 1), 0);
+          const standardError = Math.sqrt(
+            Math.max((boundedRate * (1 - boundedRate)) / sampleSize, 0)
+          );
+          const lower = Math.max(boundedRate - zScore * standardError, 0);
+          const upper = Math.min(boundedRate + zScore * standardError, 1);
+
+          return { lower: lower * 100, upper: upper * 100 };
         };
 
       const erf = (x) => {
@@ -226,6 +549,56 @@
 
         useEffect(() => {
           setResults(calculateResults());
+        }, [groupASize, groupBSize, groupARate, groupBRate]);
+
+        const sampleProjectionSeries = React.useMemo(() => {
+          const minScale = 0.25;
+          const maxScale = 2;
+          const steps = 12;
+
+          if (groupASize <= 0 || groupBSize <= 0) {
+            return [];
+          }
+
+          const scaleValues = Array.from({ length: steps }, (_, index) => {
+            if (steps === 1) {
+              return 1;
+            }
+            return minScale + ((maxScale - minScale) * index) / (steps - 1);
+          });
+
+          const seen = new Set();
+          const projections = [];
+
+          scaleValues.forEach((scale) => {
+            const adjustedA = Math.max(2, Math.round(groupASize * scale));
+            const adjustedB = Math.max(2, Math.round(groupBSize * scale));
+            const key = `${adjustedA}-${adjustedB}`;
+
+            if (seen.has(key)) {
+              return;
+            }
+
+            seen.add(key);
+
+            const averageSample = Math.round((adjustedA + adjustedB) / 2);
+            const groupACi = computeConfidenceBounds(groupARate, adjustedA);
+            const groupBCi = computeConfidenceBounds(groupBRate, adjustedB);
+
+            projections.push({
+              sampleSize: averageSample,
+              nA: adjustedA,
+              nB: adjustedB,
+              aRate: groupARate * 100,
+              bRate: groupBRate * 100,
+              aLower: groupACi.lower,
+              aUpper: groupACi.upper,
+              bLower: groupBCi.lower,
+              bUpper: groupBCi.upper,
+            });
+          });
+
+          return projections.sort((a, b) => a.sampleSize - b.sampleSize);
         }, [groupASize, groupBSize, groupARate, groupBRate]);
 
         const chartData = [
@@ -742,6 +1115,31 @@
                           </p>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <h2 className="text-xl font-semibold text-[#000000]">
+                          Conversion Lift Over Sample Size
+                        </h2>
+                        <p className="text-xs uppercase tracking-wide text-[#6B7280]">
+                          95% confidence intervals
+                        </p>
+                      </div>
+                      <p className="text-sm text-[#373A36] mt-2 mb-4">
+                        Suggestion 1 maps to the paired lines that track each group&apos;s conversion rate
+                        as sample size increases, while suggestion 2 is represented by the shaded
+                        confidence bands that contract with larger samples. Each point applies the current
+                        rates to proportionally scaled sample sizes for Groups A and B.
+                      </p>
+                      <ConversionLiftChart
+                        series={sampleProjectionSeries}
+                        groupALabel={scenarioDetails.groupALabel}
+                        groupBLabel={scenarioDetails.groupBLabel}
+                      />
+                      <p className="text-xs text-[#6B7280] mt-3">
+                        Confidence intervals use a normal approximation and assume the same observed rates while sample sizes scale.
+                      </p>
                     </div>
 
                     <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
