@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Impact of sample size on hypothesis testing v4</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' ry='12' fill='%233b82f6'/%3E%3Ctext x='32' y='40' font-family='Arial' font-size='28' text-anchor='middle' fill='white'%3ES%3C/text%3E%3C/svg%3E"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-white text-[#000000]">
+    <div class="p-6 max-w-7xl mx-auto bg-white min-h-screen" id="app">
+      <div class="bg-black border border-white/10 rounded-lg shadow-sm p-6 mb-6 text-white">
+        <h1 class="text-3xl font-bold text-white mb-3">
+          Impact of sample size on hypothesis testing v4
+        </h1>
+        <p class="text-base text-white">
+          This interactive email campaign experiment illustrates how changing the size of each
+          sample alters statistical power, confidence intervals, and the likelihood of detecting
+          meaningful differences between two subject lines.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+              <h2 class="text-xl font-semibold mb-4 text-[#000000]" id="group-a-heading"></h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-[#373A36] mb-2" for="group-a-size">
+                    Sample Size
+                  </label>
+                  <input
+                    id="group-a-size"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    class="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                  />
+                  <div class="mt-2 flex items-center gap-3">
+                    <input
+                      id="group-a-size-slider"
+                      type="range"
+                      min="-100"
+                      max="100"
+                      step="10"
+                      class="flex-1 accent-[#C28E0E] cursor-pointer"
+                      title="Adjust by 10% increments (±100%)"
+                      aria-label="Adjust Group A sample size by percentage change"
+                    />
+                    <span class="text-xs font-medium text-[#373A36]" id="group-a-size-slider-label"></span>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-[#373A36] mb-2" for="group-a-rate">
+                    Metric (%)
+                  </label>
+                  <input
+                    id="group-a-rate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    class="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                  />
+                  <div class="mt-2 flex items-center gap-3">
+                    <input
+                      id="group-a-rate-slider"
+                      type="range"
+                      min="-100"
+                      max="100"
+                      step="10"
+                      class="flex-1 accent-[#C28E0E] cursor-pointer"
+                      title="Adjust by 10% increments (±100%)"
+                      aria-label="Adjust Group A metric by percentage change"
+                    />
+                    <span class="text-xs font-medium text-[#373A36]" id="group-a-rate-slider-label"></span>
+                  </div>
+                </div>
+                <div class="bg-[#CEB888]/20 p-3 rounded">
+                  <p class="text-sm text-[#373A36]">
+                    <strong>Conversions:</strong>
+                    <span id="group-a-conversions"></span>
+                  </p>
+                  <p class="text-sm text-[#373A36]">
+                    <strong>Rate:</strong>
+                    <span id="group-a-rate-display"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+              <h2 class="text-xl font-semibold mb-4 text-[#000000]" id="group-b-heading"></h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-[#373A36] mb-2" for="group-b-size">
+                    Sample Size
+                  </label>
+                  <input
+                    id="group-b-size"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    class="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                  />
+                  <div class="mt-2 flex items-center gap-3">
+                    <input
+                      id="group-b-size-slider"
+                      type="range"
+                      min="-100"
+                      max="100"
+                      step="10"
+                      class="flex-1 accent-[#C28E0E] cursor-pointer"
+                      title="Adjust by 10% increments (±100%)"
+                      aria-label="Adjust Group B sample size by percentage change"
+                    />
+                    <span class="text-xs font-medium text-[#373A36]" id="group-b-size-slider-label"></span>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-[#373A36] mb-2" for="group-b-rate">
+                    Metric (%)
+                  </label>
+                  <input
+                    id="group-b-rate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    class="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                  />
+                  <div class="mt-2 flex items-center gap-3">
+                    <input
+                      id="group-b-rate-slider"
+                      type="range"
+                      min="-100"
+                      max="100"
+                      step="10"
+                      class="flex-1 accent-[#C28E0E] cursor-pointer"
+                      title="Adjust by 10% increments (±100%)"
+                      aria-label="Adjust Group B metric by percentage change"
+                    />
+                    <span class="text-xs font-medium text-[#373A36]" id="group-b-rate-slider-label"></span>
+                  </div>
+                </div>
+                <div class="bg-[#CEB888]/20 p-3 rounded">
+                  <p class="text-sm text-[#373A36]">
+                    <strong>Conversions:</strong>
+                    <span id="group-b-conversions"></span>
+                  </p>
+                  <p class="text-sm text-[#373A36]">
+                    <strong>Rate:</strong>
+                    <span id="group-b-rate-display"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6" id="results-card">
+            <h2 class="text-xl font-semibold mb-4 text-[#000000]">Key Results</h2>
+            <div id="interpretation-box" class="p-4 rounded-lg mb-6 border">
+              <p class="font-medium text-lg" id="interpretation-text"></p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="bg-[#CEB888]/20 p-4 rounded-lg text-center border border-[#CEB888]/40">
+                <h3 class="font-semibold text-[#373A36] mb-1">Z-Statistic</h3>
+                <p class="text-3xl font-bold text-[#000000]" id="z-statistic"></p>
+              </div>
+              <div id="pvalue-card" class="p-4 rounded-lg text-center border">
+                <h3 class="font-semibold mb-1 text-[#000000]">P-Value</h3>
+                <p class="text-3xl font-bold text-[#000000]" id="p-value"></p>
+              </div>
+              <div class="bg-white border border-[#9D968D]/40 p-4 rounded-lg text-center">
+                <h3 class="font-semibold text-[#373A36] mb-1">Effect Size</h3>
+                <p class="text-3xl font-bold text-[#000000]" id="effect-size"></p>
+              </div>
+              <div class="bg-white border border-[#9D968D]/40 p-4 rounded-lg text-center">
+                <h3 class="font-semibold text-[#373A36] mb-1">Statistical Power</h3>
+                <p class="text-3xl font-bold text-[#000000]" id="statistical-power"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6" id="switch-card">
+            <h2 class="text-xl font-semibold mb-4 text-[#000000]">Switching Threshold Insights</h2>
+            <p class="text-sm text-[#373A36] mb-4">
+              Discover how much you would need to adjust one factor while holding the other constant
+              to flip the current conclusion of the test.
+            </p>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div class="border border-[#C28E0E]/50 rounded-lg p-4 bg-[#C28E0E]/15" id="switch-rate"></div>
+              <div class="border border-[#9D968D]/60 rounded-lg p-4 bg-[#CEB888]/20" id="switch-sample"></div>
+            </div>
+          </div>
+
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold mb-4 text-[#000000]">Learning Notes</h2>
+            <div class="space-y-3 text-sm text-[#373A36]">
+              <p>
+                <strong>P-Value:</strong> The probability of observing this difference (or more
+                extreme) if there's truly no difference between groups.
+              </p>
+              <p>
+                <strong>Z-Statistic:</strong> Measures how many standard errors the observed
+                difference is from zero.
+              </p>
+              <p>
+                <strong>Effect Size:</strong> The actual difference between groups, regardless of
+                statistical significance.
+              </p>
+              <p>
+                <strong>Statistical Power:</strong> The probability of detecting a true difference
+                when it exists.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h2 class="text-xl font-semibold text-[#000000]">Conversion Lift Over Sample Size</h2>
+              <p class="text-xs uppercase tracking-wide text-[#6B7280]">95% confidence intervals</p>
+            </div>
+            <p class="text-sm text-[#373A36] mt-2 mb-4">
+              Shaded bands illustrate the 95% confidence interval for each subject line as the sample
+              sizes scale together, while the markers show the observed conversion rates for the
+              current experiment setup. Narrower bands at larger sample sizes indicate higher
+              precision around the same underlying rates.
+            </p>
+            <div id="conversion-chart" class="overflow-x-auto"></div>
+            <p class="text-xs text-[#6B7280] mt-3">
+              Confidence intervals use a normal approximation and assume the same observed rates
+              while sample sizes scale.
+            </p>
+          </div>
+
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h2 class="text-xl font-semibold text-[#000000]">P-Value Trend by Sample Size</h2>
+              <p class="text-xs uppercase tracking-wide text-[#6B7280]" id="alpha-label"></p>
+            </div>
+            <p class="text-sm text-[#373A36] mt-2 mb-4">
+              This line traces how the two-tailed p-value for the observed difference changes as both
+              groups grow proportionally. Crossing the dashed α line shows when the projected sample
+              size would yield statistical significance if the observed conversion rates hold.
+            </p>
+            <div id="pvalue-chart" class="overflow-x-auto"></div>
+            <p class="text-xs text-[#6B7280] mt-3">
+              P-values are computed with a pooled-proportion z-test using the same projected sample
+              sizes.
+            </p>
+          </div>
+
+          <div class="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6" id="details-card">
+            <h2 class="text-xl font-semibold mb-4 text-[#000000]">Statistical Details</h2>
+            <div class="space-y-4">
+              <div class="bg-[#CEB888]/20 p-4 rounded-lg border border-[#CEB888]/40">
+                <h3 class="font-semibold text-[#000000] mb-2">Hypothesis Test Setup</h3>
+                <p class="text-sm text-[#373A36]"><strong>H₀:</strong> p₁ = p₂ (No difference between groups)</p>
+                <p class="text-sm text-[#373A36]"><strong>H₁:</strong> p₁ ≠ p₂ (There is a difference between groups)</p>
+                <p class="text-sm text-[#373A36]"><strong>Significance Level:</strong> α = <span id="alpha-value"></span></p>
+              </div>
+              <div class="bg-white border border-[#9D968D]/40 p-4 rounded-lg">
+                <h3 class="font-semibold text-[#000000] mb-2">Confidence Interval (95%)</h3>
+                <p class="text-sm text-[#373A36]" id="ci-text"></p>
+                <p class="text-xs text-[#373A36] mt-1 hidden" id="ci-warning">
+                  ⚠️ The confidence interval includes 0, suggesting no significant difference.
+                </p>
+              </div>
+              <div class="bg-[#C28E0E]/15 p-4 rounded-lg border border-[#C28E0E]/40">
+                <h3 class="font-semibold text-[#000000] mb-2">Key Metrics</h3>
+                <div class="grid grid-cols-1 gap-2 text-sm text-[#373A36] sm:grid-cols-2">
+                  <p><strong>Pooled Proportion:</strong> <span id="pooled-proportion"></span></p>
+                  <p><strong>Standard Error:</strong> <span id="standard-error"></span></p>
+                  <p><strong>Group A Rate:</strong> <span id="group-a-rate-metric"></span></p>
+                  <p><strong>Group B Rate:</strong> <span id="group-b-rate-metric"></span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const significanceLevel = 0.05;
+      const scenarioDetails = {
+        metric: 'Open Rate',
+        groupALabel: 'Current Subject',
+        groupBLabel: 'New Subject',
+      };
+
+      const state = {
+        groupASize: 500,
+        groupBSize: 500,
+        groupARate: 0.12,
+        groupBRate: 0.15,
+        groupASizeSlider: 0,
+        groupBSizeSlider: 0,
+        groupARateSlider: 0,
+        groupBRateSlider: 0,
+        groupASizeBase: 500,
+        groupBSizeBase: 500,
+        groupARateBase: 0.12,
+        groupBRateBase: 0.15,
+      };
+
+      const elements = {
+        groupAHeading: document.getElementById('group-a-heading'),
+        groupBHeading: document.getElementById('group-b-heading'),
+        groupASizeInput: document.getElementById('group-a-size'),
+        groupBSizeInput: document.getElementById('group-b-size'),
+        groupARateInput: document.getElementById('group-a-rate'),
+        groupBRateInput: document.getElementById('group-b-rate'),
+        groupASizeSlider: document.getElementById('group-a-size-slider'),
+        groupBSizeSlider: document.getElementById('group-b-size-slider'),
+        groupARateSlider: document.getElementById('group-a-rate-slider'),
+        groupBRateSlider: document.getElementById('group-b-rate-slider'),
+        groupASizeSliderLabel: document.getElementById('group-a-size-slider-label'),
+        groupBSizeSliderLabel: document.getElementById('group-b-size-slider-label'),
+        groupARateSliderLabel: document.getElementById('group-a-rate-slider-label'),
+        groupBRateSliderLabel: document.getElementById('group-b-rate-slider-label'),
+        groupAConversions: document.getElementById('group-a-conversions'),
+        groupBConversions: document.getElementById('group-b-conversions'),
+        groupARateDisplay: document.getElementById('group-a-rate-display'),
+        groupBRateDisplay: document.getElementById('group-b-rate-display'),
+        zStatistic: document.getElementById('z-statistic'),
+        pValue: document.getElementById('p-value'),
+        effectSize: document.getElementById('effect-size'),
+        statisticalPower: document.getElementById('statistical-power'),
+        interpretationBox: document.getElementById('interpretation-box'),
+        interpretationText: document.getElementById('interpretation-text'),
+        pValueCard: document.getElementById('pvalue-card'),
+        switchRate: document.getElementById('switch-rate'),
+        switchSample: document.getElementById('switch-sample'),
+        conversionChart: document.getElementById('conversion-chart'),
+        pvalueChart: document.getElementById('pvalue-chart'),
+        alphaLabel: document.getElementById('alpha-label'),
+        alphaValue: document.getElementById('alpha-value'),
+        ciText: document.getElementById('ci-text'),
+        ciWarning: document.getElementById('ci-warning'),
+        pooledProportion: document.getElementById('pooled-proportion'),
+        standardError: document.getElementById('standard-error'),
+        groupARateMetric: document.getElementById('group-a-rate-metric'),
+        groupBRateMetric: document.getElementById('group-b-rate-metric'),
+        resultsCard: document.getElementById('results-card'),
+        switchCard: document.getElementById('switch-card'),
+        detailsCard: document.getElementById('details-card'),
+      };
+
+      elements.groupAHeading.textContent = `Group A: ${scenarioDetails.groupALabel}`;
+      elements.groupBHeading.textContent = `Group B: ${scenarioDetails.groupBLabel}`;
+      elements.alphaLabel.textContent = `two-tailed test, α = ${(significanceLevel * 100).toFixed(1)}%`;
+      elements.alphaValue.textContent = significanceLevel;
+
+      const clampNumber = (value, min, max) => {
+        if (!Number.isFinite(value)) {
+          return min;
+        }
+        if (!Number.isFinite(min) || !Number.isFinite(max)) {
+          return value;
+        }
+        return Math.min(Math.max(value, min), max);
+      };
+
+      const sliderToMultiplier = (value) => {
+        if (!Number.isFinite(value)) {
+          return 1;
+        }
+        const clampedValue = clampNumber(value, -100, 100);
+        return (clampedValue + 100) / 100;
+      };
+
+      const formatSliderLabel = (value) => {
+        if (!Number.isFinite(value)) {
+          return '0%';
+        }
+        const clampedValue = clampNumber(value, -100, 100);
+        const prefix = clampedValue > 0 ? '+' : '';
+        return `${prefix}${clampedValue}%`;
+      };
+
+      const erf = (x) => {
+        const a1 = 0.254829592;
+        const a2 = -0.284496736;
+        const a3 = 1.421413741;
+        const a4 = -1.453152027;
+        const a5 = 1.061405429;
+        const p = 0.3275911;
+        const sign = x >= 0 ? 1 : -1;
+        const absX = Math.abs(x);
+        const t = 1.0 / (1.0 + p * absX);
+        const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+        return sign * y;
+      };
+
+      const normalCDF = (x) => 0.5 * (1 + erf(x / Math.sqrt(2)));
+
+      const computeConfidenceBounds = (rate, sampleSize, zScore = 1.96) => {
+        if (!Number.isFinite(sampleSize) || sampleSize <= 0) {
+          const capped = Math.max(Math.min(rate, 1), 0) * 100;
+          return { lower: capped, upper: capped };
+        }
+        const boundedRate = Math.max(Math.min(rate, 1), 0);
+        const standardError = Math.sqrt(Math.max((boundedRate * (1 - boundedRate)) / sampleSize, 0));
+        const lower = Math.max(boundedRate - zScore * standardError, 0);
+        const upper = Math.min(boundedRate + zScore * standardError, 1);
+        return { lower: lower * 100, upper: upper * 100 };
+      };
+
+      const computeTestMetrics = (n1, n2, p1, p2) => {
+        if (n1 <= 0 || n2 <= 0) {
+          return { pValue: 1, zStat: 0, pooledP: 0, se: 0 };
+        }
+        const pooledP = (p1 * n1 + p2 * n2) / (n1 + n2);
+        const variance = pooledP * (1 - pooledP) * (1 / n1 + 1 / n2);
+        const se = Math.sqrt(Math.max(variance, 0));
+        if (!Number.isFinite(se) || se === 0) {
+          return { pValue: 1, zStat: 0, pooledP, se: 0 };
+        }
+        const zStat = (p2 - p1) / se;
+        const pValue = Math.min(Math.max(2 * (1 - normalCDF(Math.abs(zStat))), 0), 1);
+        return { pValue, zStat, pooledP, se };
+      };
+
+      const calculatePower = (n1, n2, p1, p2) => {
+        const pooledP = (n1 * p1 + n2 * p2) / (n1 + n2);
+        const se1 = Math.sqrt(pooledP * (1 - pooledP) * (1 / n1 + 1 / n2));
+        const se2 = Math.sqrt((p1 * (1 - p1)) / n1 + (p2 * (1 - p2)) / n2);
+        const criticalValue = 1.96;
+        const effectSize = Math.abs(p2 - p1);
+        const zBeta = (effectSize - criticalValue * se1) / se2;
+        return normalCDF(zBeta);
+      };
+
+      const calculateResults = () => {
+        const groupASuccesses = Math.round(state.groupASize * state.groupARate);
+        const groupBSuccesses = Math.round(state.groupBSize * state.groupBRate);
+        const p1 = state.groupARate;
+        const p2 = state.groupBRate;
+        const { pValue, zStat, pooledP, se } = computeTestMetrics(state.groupASize, state.groupBSize, p1, p2);
+        const effectSize = p2 - p1;
+        const effectSizePercent = effectSize * 100;
+        const seDiff = Math.sqrt((p1 * (1 - p1)) / state.groupASize + (p2 * (1 - p2)) / state.groupBSize);
+        const criticalValue = 1.96;
+        const ciLower = effectSize - criticalValue * seDiff;
+        const ciUpper = effectSize + criticalValue * seDiff;
+        const power = calculatePower(state.groupASize, state.groupBSize, p1, p2);
+        return {
+          groupASuccesses,
+          groupBSuccesses,
+          p1,
+          p2,
+          zStat,
+          pValue,
+          effectSize,
+          effectSizePercent,
+          ciLower: ciLower * 100,
+          ciUpper: ciUpper * 100,
+          isSignificant: pValue < significanceLevel,
+          power,
+          pooledP,
+          se,
+        };
+      };
+
+      const computeSampleProjectionSeries = () => {
+        const minScale = 0.25;
+        const maxScale = 2;
+        const steps = 12;
+        if (state.groupASize <= 0 || state.groupBSize <= 0) {
+          return [];
+        }
+        const scaleValues = Array.from({ length: steps }, (_, index) => {
+          if (steps === 1) {
+            return 1;
+          }
+          return minScale + ((maxScale - minScale) * index) / (steps - 1);
+        });
+        const seen = new Set();
+        const projections = [];
+        scaleValues.forEach((scale) => {
+          const adjustedA = Math.max(2, Math.round(state.groupASize * scale));
+          const adjustedB = Math.max(2, Math.round(state.groupBSize * scale));
+          const key = `${adjustedA}-${adjustedB}`;
+          if (seen.has(key)) {
+            return;
+          }
+          seen.add(key);
+          const averageSample = Math.round((adjustedA + adjustedB) / 2);
+          const groupACi = computeConfidenceBounds(state.groupARate, adjustedA);
+          const groupBCi = computeConfidenceBounds(state.groupBRate, adjustedB);
+          const { pValue } = computeTestMetrics(adjustedA, adjustedB, state.groupARate, state.groupBRate);
+          projections.push({
+            sampleSize: averageSample,
+            nA: adjustedA,
+            nB: adjustedB,
+            aRate: state.groupARate * 100,
+            bRate: state.groupBRate * 100,
+            aLower: groupACi.lower,
+            aUpper: groupACi.upper,
+            bLower: groupBCi.lower,
+            bUpper: groupBCi.upper,
+            pValue,
+          });
+        });
+        return projections.sort((a, b) => a.sampleSize - b.sampleSize);
+      };
+
+      const getSignificanceColor = (pValue) => {
+        if (pValue < 0.001) return 'border border-[#C28E0E] bg-[#C28E0E]/30 text-[#000000]';
+        if (pValue < 0.01) return 'border border-[#C28E0E]/80 bg-[#C28E0E]/20 text-[#000000]';
+        if (pValue < 0.05) return 'border border-[#CEB888]/70 bg-[#CEB888]/25 text-[#000000]';
+        return 'border border-[#9D968D]/60 bg-[#9D968D]/20 text-[#373A36]';
+      };
+
+      const getInterpretation = (results) => {
+        if (!results) return '';
+        if (results.isSignificant) {
+          return `🎉 Statistically Significant! The difference of ${results.effectSizePercent.toFixed(2)}% is unlikely due to chance alone (p = ${results.pValue.toFixed(4)}). We can reject the null hypothesis.`;
+        }
+        return `❌ Not Statistically Significant. The observed difference of ${results.effectSizePercent.toFixed(2)}% could reasonably be due to chance (p = ${results.pValue.toFixed(4)}). We fail to reject the null hypothesis.`;
+      };
+
+      const computeSwitchInsights = (results) => {
+        if (!results) {
+          return { rate: null, sampleSize: null };
+        }
+        const currentSignificant = results.isSignificant;
+
+        const evaluateRate = (rate) => {
+          const metrics = computeTestMetrics(state.groupASize, state.groupBSize, state.groupARate, rate);
+          return {
+            ...metrics,
+            rate,
+            isSignificant: metrics.pValue < significanceLevel,
+          };
+        };
+
+        const findRateThreshold = () => {
+          const startEvaluation = evaluateRate(state.groupBRate);
+          if (state.groupASize <= 0 || state.groupBSize <= 0) {
+            return null;
+          }
+          if (currentSignificant) {
+            if (Math.abs(state.groupBRate - state.groupARate) < 1e-6) {
+              return null;
+            }
+            if (state.groupBRate > state.groupARate) {
+              let low = state.groupARate;
+              let high = state.groupBRate;
+              const lowEval = evaluateRate(low);
+              const highEval = startEvaluation;
+              if (lowEval.isSignificant === highEval.isSignificant) {
+                return null;
+              }
+              for (let i = 0; i < 60; i++) {
+                const mid = (low + high) / 2;
+                const midEval = evaluateRate(mid);
+                if (midEval.isSignificant) {
+                  high = mid;
+                } else {
+                  low = mid;
+                }
+              }
+              const finalEval = evaluateRate(high);
+              return {
+                direction: 'decrease',
+                targetRate: high,
+                delta: high - state.groupBRate,
+                ...finalEval,
+              };
+            }
+            if (state.groupBRate < state.groupARate) {
+              let low = state.groupBRate;
+              let high = state.groupARate;
+              const highEval = evaluateRate(high);
+              const lowEval = startEvaluation;
+              if (lowEval.isSignificant === highEval.isSignificant) {
+                return null;
+              }
+              for (let i = 0; i < 60; i++) {
+                const mid = (low + high) / 2;
+                const midEval = evaluateRate(mid);
+                if (midEval.isSignificant) {
+                  low = mid;
+                } else {
+                  high = mid;
+                }
+              }
+              const finalEval = evaluateRate(high);
+              return {
+                direction: 'increase',
+                targetRate: high,
+                delta: high - state.groupBRate,
+                ...finalEval,
+              };
+            }
+            return null;
+          }
+
+          if (!currentSignificant) {
+            let low = Math.max(0, Math.min(state.groupARate, state.groupBRate));
+            let high = Math.min(1, Math.max(state.groupARate, state.groupBRate));
+            let lowEval = evaluateRate(low);
+            let highEval = evaluateRate(high);
+            if (lowEval.isSignificant) {
+              return {
+                direction: low < state.groupBRate ? 'decrease' : 'increase',
+                targetRate: low,
+                delta: low - state.groupBRate,
+                ...lowEval,
+              };
+            }
+            if (highEval.isSignificant) {
+              return {
+                direction: high < state.groupBRate ? 'decrease' : 'increase',
+                targetRate: high,
+                delta: high - state.groupBRate,
+                ...highEval,
+              };
+            }
+            let iterations = 0;
+            while (iterations < 60 && high - low > 1e-6) {
+              const mid = (low + high) / 2;
+              const midEval = evaluateRate(mid);
+              if (midEval.isSignificant) {
+                high = mid;
+                highEval = midEval;
+              } else {
+                low = mid;
+                lowEval = midEval;
+              }
+              iterations += 1;
+            }
+            if (highEval && highEval.isSignificant) {
+              return {
+                direction: high < state.groupBRate ? 'decrease' : 'increase',
+                targetRate: high,
+                delta: high - state.groupBRate,
+                ...highEval,
+              };
+            }
+          }
+          return null;
+        };
+
+        const evaluateScale = (scale) => {
+          const minSample = 2;
+          const adjustedN1 = Math.max(state.groupASize * scale, minSample);
+          const adjustedN2 = Math.max(state.groupBSize * scale, minSample);
+          const metrics = computeTestMetrics(adjustedN1, adjustedN2, state.groupARate, state.groupBRate);
+          return {
+            ...metrics,
+            scale,
+            adjustedN1,
+            adjustedN2,
+            isSignificant: metrics.pValue < significanceLevel,
+          };
+        };
+
+        const findSampleSizeThreshold = () => {
+          const minScale = Math.min(1, Math.max(2 / state.groupASize, 2 / state.groupBSize));
+          const currentEval = evaluateScale(1);
+          if (currentSignificant) {
+            let low = minScale;
+            let high = 1;
+            const lowEval = evaluateScale(low);
+            const highEval = currentEval;
+            if (lowEval.isSignificant === highEval.isSignificant) {
+              return null;
+            }
+            for (let i = 0; i < 60; i++) {
+              const mid = (low + high) / 2;
+              const midEval = evaluateScale(mid);
+              if (midEval.isSignificant) {
+                high = mid;
+              } else {
+                low = mid;
+              }
+            }
+            const finalEval = evaluateScale(high);
+            return {
+              direction: 'decrease',
+              ...finalEval,
+            };
+          }
+
+          if (!currentSignificant) {
+            let low = 1;
+            let high = 1;
+            let highEval = currentEval;
+            const maxScale = 1000;
+            while (!highEval.isSignificant && high < maxScale) {
+              high *= 2;
+              highEval = evaluateScale(high);
+              if (state.groupASize * high > 1_000_000 || state.groupBSize * high > 1_000_000) {
+                break;
+              }
+            }
+            if (!highEval.isSignificant) {
+              return null;
+            }
+            for (let i = 0; i < 60; i++) {
+              const mid = (low + high) / 2;
+              const midEval = evaluateScale(mid);
+              if (midEval.isSignificant) {
+                high = mid;
+              } else {
+                low = mid;
+              }
+            }
+            const finalEval = evaluateScale(high);
+            return {
+              direction: 'increase',
+              ...finalEval,
+            };
+          }
+          return null;
+        };
+
+        return {
+          rate: findRateThreshold(),
+          sampleSize: findSampleSizeThreshold(),
+        };
+      };
+
+      const renderSwitchRate = (info, results) => {
+        if (!results) {
+          elements.switchRate.innerHTML = '<h3 class="font-semibold text-[#000000] mb-2">Adjust Group B Rate</h3><p class="text-sm text-[#373A36]">No results available.</p>';
+          return;
+        }
+        let body = '<h3 class="font-semibold text-[#000000] mb-2">Adjust Group B Rate</h3>';
+        if (!info || !Number.isFinite(info.targetRate)) {
+          body += '<p class="text-sm text-[#373A36]">Unable to find a rate adjustment within the 0%–100% range that would reverse the current conclusion.</p>';
+        } else {
+          body += `<div class="text-sm text-[#373A36] space-y-2">
+            <p>${info.direction === 'increase' ? 'Increase' : 'Decrease'} Group B\'s rate to <strong>${(info.targetRate * 100).toFixed(2)}%</strong> to push the p-value to approximately <strong>${info.pValue.toFixed(4)}</strong>, causing the test to become ${info.isSignificant ? 'statistically significant.' : 'not statistically significant.'}</p>
+            <p class="text-xs text-[#373A36]">Current rate: ${(state.groupBRate * 100).toFixed(2)}% · Change of ${(info.delta * 100).toFixed(2)}%</p>
+          </div>`;
+        }
+        elements.switchRate.innerHTML = body;
+      };
+
+      const renderSwitchSample = (info, results) => {
+        if (!results) {
+          elements.switchSample.innerHTML = '<h3 class="font-semibold text-[#000000] mb-2">Adjust Sample Sizes</h3><p class="text-sm text-[#373A36]">No results available.</p>';
+          return;
+        }
+        let body = '<h3 class="font-semibold text-[#000000] mb-2">Adjust Sample Sizes</h3>';
+        if (!info || !Number.isFinite(info.adjustedN1) || !Number.isFinite(info.adjustedN2)) {
+          body += '<p class="text-sm text-[#373A36]">Unable to identify sample sizes within practical bounds that would reverse the current outcome.</p>';
+        } else {
+          body += `<div class="text-sm text-[#373A36] space-y-2">
+            <p>${info.direction === 'increase' ? 'Scale up' : 'Scale down'} the sample sizes to about <strong>${Math.round(info.adjustedN1).toLocaleString()}</strong> in Group A and <strong>${Math.round(info.adjustedN2).toLocaleString()}</strong> in Group B. This would yield a p-value of <strong>${info.pValue.toFixed(4)}</strong> and flip the statistical conclusion.</p>
+            <p class="text-xs text-[#373A36]">Scale factor: ×${info.scale.toFixed(2)} · Current sizes: ${state.groupASize.toLocaleString()} vs ${state.groupBSize.toLocaleString()}</p>
+          </div>`;
+        }
+        elements.switchSample.innerHTML = body;
+      };
+
+      const buildConversionChart = (series) => {
+        if (!series || series.length === 0) {
+          elements.conversionChart.innerHTML = '<div class="flex h-64 items-center justify-center text-[#9D968D]">Not enough data to render the chart</div>';
+          return;
+        }
+        const width = 680;
+        const height = 340;
+        const margin = { top: 24, right: 24, bottom: 56, left: 64 };
+        const sampleSizes = series.map((point) => point.sampleSize);
+        const minSample = Math.min(...sampleSizes);
+        const maxSample = Math.max(...sampleSizes);
+        const allValues = series.flatMap((point) => [point.aLower, point.aUpper, point.bLower, point.bUpper]);
+        const minValue = Math.min(...allValues);
+        const maxValue = Math.max(...allValues);
+        const chartHeight = height - margin.top - margin.bottom;
+        const chartWidth = width - margin.left - margin.right;
+        const xScale = (value) => {
+          if (maxSample === minSample) {
+            return margin.left + chartWidth / 2;
+          }
+          return margin.left + ((value - minSample) / (maxSample - minSample)) * chartWidth;
+        };
+        const yScale = (value) => {
+          const safeMax = maxValue === minValue ? minValue + 1 : maxValue;
+          return margin.top + chartHeight - ((value - minValue) / (safeMax - minValue)) * chartHeight;
+        };
+        const formatSampleLabel = (point) => `${point.nA.toLocaleString()} vs ${point.nB.toLocaleString()}`;
+        const buildBandPath = (lowerKey, upperKey) => {
+          const upperPath = series.map((point, index) => {
+            const command = index === 0 ? 'M' : 'L';
+            return `${command} ${xScale(point.sampleSize)} ${yScale(point[upperKey])}`;
+          });
+          const lowerPath = [...series].reverse().map((point) => `L ${xScale(point.sampleSize)} ${yScale(point[lowerKey])}`);
+          return [upperPath[0], ...upperPath.slice(1), ...lowerPath, 'Z'].join(' ');
+        };
+        const yTicks = 5;
+        const yStep = (maxValue - minValue) / yTicks || 1;
+        const yTickValues = Array.from({ length: yTicks + 1 }, (_, idx) => minValue + idx * yStep);
+        const xTickCandidates = [series[0], series[Math.floor(series.length / 2)], series[series.length - 1]].filter(Boolean);
+        const xTicks = xTickCandidates.filter((point, index, arr) => arr.findIndex((candidate) => candidate.sampleSize === point.sampleSize) === index);
+        const svgParts = [];
+        svgParts.push(`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Conversion rates with confidence intervals as sample sizes change" class="w-full max-w-full">`);
+        svgParts.push('<defs>');
+        svgParts.push('<linearGradient id="groupA-band" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#9D968D" stop-opacity="0.28" /><stop offset="100%" stop-color="#9D968D" stop-opacity="0.08" /></linearGradient>');
+        svgParts.push('<linearGradient id="groupB-band" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#C28E0E" stop-opacity="0.28" /><stop offset="100%" stop-color="#C28E0E" stop-opacity="0.08" /></linearGradient>');
+        svgParts.push('</defs>');
+        svgParts.push(`<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#D1D5DB" stroke-width="1" />`);
+        svgParts.push(`<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#D1D5DB" stroke-width="1" />`);
+        yTickValues.forEach((tick) => {
+          const y = yScale(tick);
+          svgParts.push(`<g><line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#E5E7EB" stroke-width="0.5" /><text x="${margin.left - 12}" y="${y + 4}" text-anchor="end" font-size="12" fill="#4B5563">${tick.toFixed(1)}%</text></g>`);
+        });
+        xTicks.forEach((point, idx) => {
+          if (!point) return;
+          const x = xScale(point.sampleSize);
+          svgParts.push(`<g><line x1="${x}" y1="${height - margin.bottom}" x2="${x}" y2="${height - margin.bottom + 8}" stroke="#4B5563" stroke-width="1" /><text x="${x}" y="${height - margin.bottom + 24}" text-anchor="middle" font-size="12" fill="#4B5563">${point.sampleSize.toLocaleString()}</text><text x="${x}" y="${height - margin.bottom + 40}" text-anchor="middle" font-size="10" fill="#6B7280">${formatSampleLabel(point)}</text></g>`);
+        });
+        svgParts.push(`<path d="${buildBandPath('aLower', 'aUpper')}" fill="url(#groupA-band)" stroke="none" />`);
+        svgParts.push(`<path d="${buildBandPath('bLower', 'bUpper')}" fill="url(#groupB-band)" stroke="none" />`);
+        series.forEach((point) => {
+          svgParts.push(`<g><circle cx="${xScale(point.sampleSize)}" cy="${yScale(point.aRate)}" r="4" fill="#4B5563"><title>${scenarioDetails.groupALabel}: ${point.aRate.toFixed(2)}% (±${(point.aUpper - point.aLower).toFixed(2)}%)</title></circle><circle cx="${xScale(point.sampleSize)}" cy="${yScale(point.bRate)}" r="4" fill="#C28E0E"><title>${scenarioDetails.groupBLabel}: ${point.bRate.toFixed(2)}% (±${(point.bUpper - point.bLower).toFixed(2)}%)</title></circle></g>`);
+        });
+        svgParts.push(`<text x="${margin.left + chartWidth / 2}" y="${height - 8}" text-anchor="middle" font-size="14" fill="#111827" font-weight="500">Average sample size per group</text>`);
+        svgParts.push(`<text x="16" y="${margin.top}" text-anchor="start" font-size="14" fill="#111827" font-weight="500">Conversion rate (%)</text>`);
+        svgParts.push(`<g transform="translate(${width - margin.right - 220}, ${margin.top})"><rect width="220" height="48" rx="8" fill="#F9FAFB" stroke="#E5E7EB" /><circle cx="24" cy="16" r="6" fill="#4B5563" /><text x="40" y="20" font-size="12" fill="#111827">${scenarioDetails.groupALabel}</text><rect x="16" y="28" width="16" height="8" fill="url(#groupA-band)" stroke="#4B5563" stroke-width="0.6" /><text x="40" y="36" font-size="11" fill="#4B5563">95% CI</text><circle cx="132" cy="16" r="6" fill="#C28E0E" /><text x="148" y="20" font-size="12" fill="#111827">${scenarioDetails.groupBLabel}</text><rect x="124" y="28" width="16" height="8" fill="url(#groupB-band)" stroke="#C28E0E" stroke-width="0.6" /><text x="148" y="36" font-size="11" fill="#C28E0E">95% CI</text></g>`);
+        svgParts.push('</svg>');
+        elements.conversionChart.innerHTML = svgParts.join('');
+      };
+
+      const buildPValueChart = (series) => {
+        if (!series || series.length === 0) {
+          elements.pvalueChart.innerHTML = '<div class="flex h-64 items-center justify-center text-[#9D968D]">Not enough data to render the chart</div>';
+          return;
+        }
+        const width = 680;
+        const height = 340;
+        const margin = { top: 24, right: 24, bottom: 56, left: 64 };
+        const sampleSizes = series.map((point) => point.sampleSize);
+        const pValues = series.map((point) => point.pValue);
+        const minSample = Math.min(...sampleSizes);
+        const maxSample = Math.max(...sampleSizes);
+        const maxPValue = Math.max(1, ...pValues, significanceLevel);
+        const chartHeight = height - margin.top - margin.bottom;
+        const chartWidth = width - margin.left - margin.right;
+        const xScale = (value) => {
+          if (maxSample === minSample) {
+            return margin.left + chartWidth / 2;
+          }
+          return margin.left + ((value - minSample) / (maxSample - minSample)) * chartWidth;
+        };
+        const yScale = (value) => margin.top + chartHeight - ((value - 0) / (maxPValue - 0 || 1)) * chartHeight;
+        const buildLinePath = () => series.map((point, index) => {
+          const prefix = index === 0 ? 'M' : 'L';
+          return `${prefix} ${xScale(point.sampleSize)} ${yScale(point.pValue)}`;
+        }).join(' ');
+        const yTicks = 5;
+        const yStep = (maxPValue - 0) / yTicks || 0.2;
+        const yTickValues = Array.from({ length: yTicks + 1 }, (_, idx) => 0 + idx * yStep);
+        const xTickCandidates = [series[0], series[Math.floor(series.length / 2)], series[series.length - 1]].filter(Boolean);
+        const xTicks = xTickCandidates.filter((point, index, arr) => arr.findIndex((candidate) => candidate.sampleSize === point.sampleSize) === index);
+        const svgParts = [];
+        svgParts.push(`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="P-value trends as sample sizes change" class="w-full max-w-full">`);
+        svgParts.push(`<line x1="${margin.left}" y1="${height - margin.bottom}" x2="${width - margin.right}" y2="${height - margin.bottom}" stroke="#D1D5DB" stroke-width="1" />`);
+        svgParts.push(`<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${height - margin.bottom}" stroke="#D1D5DB" stroke-width="1" />`);
+        yTickValues.forEach((tick) => {
+          const y = yScale(tick);
+          svgParts.push(`<g><line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#E5E7EB" stroke-width="0.5" /><text x="${margin.left - 12}" y="${y + 4}" text-anchor="end" font-size="12" fill="#4B5563">${tick.toFixed(2)}</text></g>`);
+        });
+        xTicks.forEach((point) => {
+          if (!point) return;
+          const x = xScale(point.sampleSize);
+          svgParts.push(`<g><line x1="${x}" y1="${height - margin.bottom}" x2="${x}" y2="${height - margin.bottom + 8}" stroke="#4B5563" stroke-width="1" /><text x="${x}" y="${height - margin.bottom + 24}" text-anchor="middle" font-size="12" fill="#4B5563">${point.sampleSize.toLocaleString()}</text><text x="${x}" y="${height - margin.bottom + 40}" text-anchor="middle" font-size="10" fill="#6B7280">${point.nA.toLocaleString()} vs ${point.nB.toLocaleString()}</text></g>`);
+        });
+        svgParts.push(`<line x1="${margin.left}" y1="${yScale(significanceLevel)}" x2="${width - margin.right}" y2="${yScale(significanceLevel)}" stroke="#EF4444" stroke-dasharray="6 4" stroke-width="1.5" />`);
+        svgParts.push(`<text x="${width - margin.right}" y="${yScale(significanceLevel) - 8}" text-anchor="end" font-size="12" fill="#B91C1C">α = ${significanceLevel}</text>`);
+        svgParts.push(`<path d="${buildLinePath()}" fill="none" stroke="#2563EB" stroke-width="2.5" />`);
+        series.forEach((point) => {
+          svgParts.push(`<circle cx="${xScale(point.sampleSize)}" cy="${yScale(point.pValue)}" r="4" fill="#2563EB"><title>Avg sample size ${point.sampleSize.toLocaleString()}: p = ${point.pValue.toFixed(4)}</title></circle>`);
+        });
+        svgParts.push(`<text x="${margin.left + chartWidth / 2}" y="${height - 8}" text-anchor="middle" font-size="14" fill="#111827" font-weight="500">Average sample size per group</text>`);
+        svgParts.push(`<text x="16" y="${margin.top}" text-anchor="start" font-size="14" fill="#111827" font-weight="500">Two-tailed p-value</text>`);
+        svgParts.push('</svg>');
+        elements.pvalueChart.innerHTML = svgParts.join('');
+      };
+
+      const updateGroupDisplays = () => {
+        elements.groupASizeInput.value = state.groupASize;
+        elements.groupBSizeInput.value = state.groupBSize;
+        elements.groupARateInput.value = (state.groupARate * 100).toFixed(1);
+        elements.groupBRateInput.value = (state.groupBRate * 100).toFixed(1);
+        elements.groupASizeSlider.value = state.groupASizeSlider;
+        elements.groupBSizeSlider.value = state.groupBSizeSlider;
+        elements.groupARateSlider.value = state.groupARateSlider;
+        elements.groupBRateSlider.value = state.groupBRateSlider;
+        elements.groupASizeSliderLabel.textContent = formatSliderLabel(state.groupASizeSlider);
+        elements.groupBSizeSliderLabel.textContent = formatSliderLabel(state.groupBSizeSlider);
+        elements.groupARateSliderLabel.textContent = formatSliderLabel(state.groupARateSlider);
+        elements.groupBRateSliderLabel.textContent = formatSliderLabel(state.groupBRateSlider);
+        elements.groupAConversions.textContent = `${Math.round(state.groupASize * state.groupARate)} out of ${state.groupASize}`;
+        elements.groupBConversions.textContent = `${Math.round(state.groupBSize * state.groupBRate)} out of ${state.groupBSize}`;
+        elements.groupARateDisplay.textContent = `${(state.groupARate * 100).toFixed(2)}%`;
+        elements.groupBRateDisplay.textContent = `${(state.groupBRate * 100).toFixed(2)}%`;
+      };
+
+      const updateResults = () => {
+        if (state.groupASize <= 0 || state.groupBSize <= 0) {
+          elements.resultsCard.classList.add('hidden');
+          elements.switchCard.classList.add('hidden');
+          elements.detailsCard.classList.add('hidden');
+          elements.conversionChart.innerHTML = '';
+          elements.pvalueChart.innerHTML = '';
+          return;
+        }
+        elements.resultsCard.classList.remove('hidden');
+        elements.switchCard.classList.remove('hidden');
+        elements.detailsCard.classList.remove('hidden');
+        const results = calculateResults();
+        elements.interpretationText.textContent = getInterpretation(results);
+        const interpretationClass = results.isSignificant
+          ? 'p-4 rounded-lg mb-6 border bg-[#C28E0E]/20 border-[#C28E0E]/60 text-[#000000]'
+          : 'p-4 rounded-lg mb-6 border bg-[#9D968D]/15 border-[#9D968D]/40 text-[#373A36]';
+        elements.interpretationBox.className = interpretationClass;
+        elements.zStatistic.textContent = results.zStat.toFixed(3);
+        elements.pValue.textContent = results.pValue.toFixed(4);
+        elements.effectSize.textContent = `${results.effectSizePercent.toFixed(2)}%`;
+        elements.statisticalPower.textContent = `${(results.power * 100).toFixed(1)}%`;
+        elements.pValueCard.className = `p-4 rounded-lg text-center ${getSignificanceColor(results.pValue)}`;
+        elements.ciText.innerHTML = `The true difference is likely between <strong>${results.ciLower.toFixed(2)}%</strong> and <strong>${results.ciUpper.toFixed(2)}%</strong>`;
+        if (results.ciLower <= 0 && results.ciUpper >= 0) {
+          elements.ciWarning.classList.remove('hidden');
+        } else {
+          elements.ciWarning.classList.add('hidden');
+        }
+        elements.pooledProportion.textContent = `${(results.pooledP * 100).toFixed(2)}%`;
+        elements.standardError.textContent = results.se.toFixed(4);
+        elements.groupARateMetric.textContent = `${(results.p1 * 100).toFixed(2)}%`;
+        elements.groupBRateMetric.textContent = `${(results.p2 * 100).toFixed(2)}%`;
+        const switchInsights = computeSwitchInsights(results);
+        renderSwitchRate(switchInsights.rate, results);
+        renderSwitchSample(switchInsights.sampleSize, results);
+        const series = computeSampleProjectionSeries();
+        buildConversionChart(series);
+        buildPValueChart(series);
+      };
+
+      const updateAll = () => {
+        updateGroupDisplays();
+        updateResults();
+      };
+
+      const handleGroupASizeInputChange = (event) => {
+        const rawValue = event.target.valueAsNumber;
+        if (Number.isNaN(rawValue)) {
+          state.groupASize = 0;
+          state.groupASizeBase = 0;
+          state.groupASizeSlider = 0;
+        } else {
+          const sanitized = Math.round(rawValue);
+          const clamped = clampNumber(sanitized, 0, 10000);
+          state.groupASize = clamped;
+          state.groupASizeBase = clamped;
+          state.groupASizeSlider = 0;
+        }
+        updateAll();
+      };
+
+      const handleGroupBSizeInputChange = (event) => {
+        const rawValue = event.target.valueAsNumber;
+        if (Number.isNaN(rawValue)) {
+          state.groupBSize = 0;
+          state.groupBSizeBase = 0;
+          state.groupBSizeSlider = 0;
+        } else {
+          const sanitized = Math.round(rawValue);
+          const clamped = clampNumber(sanitized, 0, 10000);
+          state.groupBSize = clamped;
+          state.groupBSizeBase = clamped;
+          state.groupBSizeSlider = 0;
+        }
+        updateAll();
+      };
+
+      const handleGroupARateInputChange = (event) => {
+        const rawValue = event.target.valueAsNumber;
+        if (Number.isNaN(rawValue)) {
+          state.groupARate = 0;
+          state.groupARateBase = 0;
+          state.groupARateSlider = 0;
+        } else {
+          const normalized = rawValue / 100;
+          const clamped = clampNumber(normalized, 0, 1);
+          state.groupARate = clamped;
+          state.groupARateBase = clamped;
+          state.groupARateSlider = 0;
+        }
+        updateAll();
+      };
+
+      const handleGroupBRateInputChange = (event) => {
+        const rawValue = event.target.valueAsNumber;
+        if (Number.isNaN(rawValue)) {
+          state.groupBRate = 0;
+          state.groupBRateBase = 0;
+          state.groupBRateSlider = 0;
+        } else {
+          const normalized = rawValue / 100;
+          const clamped = clampNumber(normalized, 0, 1);
+          state.groupBRate = clamped;
+          state.groupBRateBase = clamped;
+          state.groupBRateSlider = 0;
+        }
+        updateAll();
+      };
+
+      const handleGroupASizeSliderChange = (event) => {
+        const newSliderValue = event.target.valueAsNumber;
+        if (!Number.isFinite(newSliderValue)) {
+          return;
+        }
+        const multiplier = sliderToMultiplier(newSliderValue);
+        const baseValue = Number.isFinite(state.groupASizeBase) ? state.groupASizeBase : 0;
+        const scaled = Math.round(baseValue * multiplier);
+        state.groupASize = clampNumber(scaled, 0, 10000);
+        state.groupASizeSlider = clampNumber(newSliderValue, -100, 100);
+        updateAll();
+      };
+
+      const handleGroupBSizeSliderChange = (event) => {
+        const newSliderValue = event.target.valueAsNumber;
+        if (!Number.isFinite(newSliderValue)) {
+          return;
+        }
+        const multiplier = sliderToMultiplier(newSliderValue);
+        const baseValue = Number.isFinite(state.groupBSizeBase) ? state.groupBSizeBase : 0;
+        const scaled = Math.round(baseValue * multiplier);
+        state.groupBSize = clampNumber(scaled, 0, 10000);
+        state.groupBSizeSlider = clampNumber(newSliderValue, -100, 100);
+        updateAll();
+      };
+
+      const handleGroupARateSliderChange = (event) => {
+        const newSliderValue = event.target.valueAsNumber;
+        if (!Number.isFinite(newSliderValue)) {
+          return;
+        }
+        const multiplier = sliderToMultiplier(newSliderValue);
+        const baseRate = Number.isFinite(state.groupARateBase) ? state.groupARateBase : 0;
+        const scaled = parseFloat((baseRate * multiplier).toFixed(4));
+        state.groupARate = clampNumber(scaled, 0, 1);
+        state.groupARateSlider = clampNumber(newSliderValue, -100, 100);
+        updateAll();
+      };
+
+      const handleGroupBRateSliderChange = (event) => {
+        const newSliderValue = event.target.valueAsNumber;
+        if (!Number.isFinite(newSliderValue)) {
+          return;
+        }
+        const multiplier = sliderToMultiplier(newSliderValue);
+        const baseRate = Number.isFinite(state.groupBRateBase) ? state.groupBRateBase : 0;
+        const scaled = parseFloat((baseRate * multiplier).toFixed(4));
+        state.groupBRate = clampNumber(scaled, 0, 1);
+        state.groupBRateSlider = clampNumber(newSliderValue, -100, 100);
+        updateAll();
+      };
+
+      elements.groupASizeInput.addEventListener('input', handleGroupASizeInputChange);
+      elements.groupBSizeInput.addEventListener('input', handleGroupBSizeInputChange);
+      elements.groupARateInput.addEventListener('input', handleGroupARateInputChange);
+      elements.groupBRateInput.addEventListener('input', handleGroupBRateInputChange);
+      elements.groupASizeSlider.addEventListener('input', handleGroupASizeSliderChange);
+      elements.groupBSizeSlider.addEventListener('input', handleGroupBSizeSliderChange);
+      elements.groupARateSlider.addEventListener('input', handleGroupARateSliderChange);
+      elements.groupBRateSlider.addEventListener('input', handleGroupBRateSliderChange);
+
+      updateAll();
+    </script>
+  </body>
+</html>
