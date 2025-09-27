@@ -403,10 +403,14 @@
         const [groupBSize, setGroupBSize] = useState(500);
         const [groupARate, setGroupARate] = useState(0.12);
         const [groupBRate, setGroupBRate] = useState(0.15);
-        const [groupASizeSlider, setGroupASizeSlider] = useState(100);
-        const [groupBSizeSlider, setGroupBSizeSlider] = useState(100);
-        const [groupARateSlider, setGroupARateSlider] = useState(100);
-        const [groupBRateSlider, setGroupBRateSlider] = useState(100);
+        const [groupASizeSlider, setGroupASizeSlider] = useState(0);
+        const [groupBSizeSlider, setGroupBSizeSlider] = useState(0);
+        const [groupARateSlider, setGroupARateSlider] = useState(0);
+        const [groupBRateSlider, setGroupBRateSlider] = useState(0);
+        const [groupASizeBase, setGroupASizeBase] = useState(500);
+        const [groupBSizeBase, setGroupBSizeBase] = useState(500);
+        const [groupARateBase, setGroupARateBase] = useState(0.12);
+        const [groupBRateBase, setGroupBRateBase] = useState(0.15);
         const [results, setResults] = useState(null);
 
         const significanceLevel = 0.05;
@@ -640,132 +644,149 @@
           return Math.min(Math.max(value, min), max);
         };
 
+        const sliderToMultiplier = (value) => {
+          if (!Number.isFinite(value)) {
+            return 1;
+          }
+          const clampedValue = clampNumber(value, -100, 100);
+          return (clampedValue + 100) / 100;
+        };
+
+        const formatSliderLabel = (value) => {
+          if (!Number.isFinite(value)) {
+            return "0%";
+          }
+          const clampedValue = clampNumber(value, -100, 100);
+          const prefix = clampedValue > 0 ? "+" : "";
+          return `${prefix}${clampedValue}%`;
+        };
+
         const handleGroupASizeInputChange = (event) => {
           const rawValue = event.target.valueAsNumber;
           if (Number.isNaN(rawValue)) {
             setGroupASize(0);
-            setGroupASizeSlider(100);
+            setGroupASizeBase(0);
+            setGroupASizeSlider(0);
             return;
           }
 
           const sanitizedValue = Math.round(rawValue);
-          setGroupASize(clampNumber(sanitizedValue, 0, 10000));
-          setGroupASizeSlider(100);
+          const clampedValue = clampNumber(sanitizedValue, 0, 10000);
+          setGroupASize(clampedValue);
+          setGroupASizeBase(clampedValue);
+          setGroupASizeSlider(0);
         };
 
         const handleGroupBSizeInputChange = (event) => {
           const rawValue = event.target.valueAsNumber;
           if (Number.isNaN(rawValue)) {
             setGroupBSize(0);
-            setGroupBSizeSlider(100);
+            setGroupBSizeBase(0);
+            setGroupBSizeSlider(0);
             return;
           }
 
           const sanitizedValue = Math.round(rawValue);
-          setGroupBSize(clampNumber(sanitizedValue, 0, 10000));
-          setGroupBSizeSlider(100);
+          const clampedValue = clampNumber(sanitizedValue, 0, 10000);
+          setGroupBSize(clampedValue);
+          setGroupBSizeBase(clampedValue);
+          setGroupBSizeSlider(0);
         };
 
         const handleGroupARateInputChange = (event) => {
           const rawValue = event.target.valueAsNumber;
           if (Number.isNaN(rawValue)) {
             setGroupARate(0);
-            setGroupARateSlider(100);
+            setGroupARateBase(0);
+            setGroupARateSlider(0);
             return;
           }
 
           const normalized = rawValue / 100;
-          setGroupARate(clampNumber(normalized, 0, 1));
-          setGroupARateSlider(100);
+          const clampedRate = clampNumber(normalized, 0, 1);
+          setGroupARate(clampedRate);
+          setGroupARateBase(clampedRate);
+          setGroupARateSlider(0);
         };
 
         const handleGroupBRateInputChange = (event) => {
           const rawValue = event.target.valueAsNumber;
           if (Number.isNaN(rawValue)) {
             setGroupBRate(0);
-            setGroupBRateSlider(100);
+            setGroupBRateBase(0);
+            setGroupBRateSlider(0);
             return;
           }
 
           const normalized = rawValue / 100;
-          setGroupBRate(clampNumber(normalized, 0, 1));
-          setGroupBRateSlider(100);
+          const clampedRate = clampNumber(normalized, 0, 1);
+          setGroupBRate(clampedRate);
+          setGroupBRateBase(clampedRate);
+          setGroupBRateSlider(0);
         };
 
         const handleGroupASizeSliderChange = (event) => {
           const newSliderValue = event.target.valueAsNumber;
-          if (!Number.isFinite(newSliderValue) || newSliderValue <= 0) {
+          if (!Number.isFinite(newSliderValue)) {
             return;
           }
 
-          setGroupASize((prevSize) => {
-            if (!Number.isFinite(prevSize)) {
-              return 0;
-            }
+          const multiplier = sliderToMultiplier(newSliderValue);
+          const baseValue = Number.isFinite(groupASizeBase)
+            ? groupASizeBase
+            : 0;
+          const scaled = Math.round(baseValue * multiplier);
 
-            const safePrevious = groupASizeSlider || 1;
-            const scaled = Math.round(prevSize * (newSliderValue / safePrevious));
-            return clampNumber(scaled, 0, 10000);
-          });
-          setGroupASizeSlider(newSliderValue);
+          setGroupASize(clampNumber(scaled, 0, 10000));
+          setGroupASizeSlider(clampNumber(newSliderValue, -100, 100));
         };
 
         const handleGroupBSizeSliderChange = (event) => {
           const newSliderValue = event.target.valueAsNumber;
-          if (!Number.isFinite(newSliderValue) || newSliderValue <= 0) {
+          if (!Number.isFinite(newSliderValue)) {
             return;
           }
 
-          setGroupBSize((prevSize) => {
-            if (!Number.isFinite(prevSize)) {
-              return 0;
-            }
+          const multiplier = sliderToMultiplier(newSliderValue);
+          const baseValue = Number.isFinite(groupBSizeBase)
+            ? groupBSizeBase
+            : 0;
+          const scaled = Math.round(baseValue * multiplier);
 
-            const safePrevious = groupBSizeSlider || 1;
-            const scaled = Math.round(prevSize * (newSliderValue / safePrevious));
-            return clampNumber(scaled, 0, 10000);
-          });
-          setGroupBSizeSlider(newSliderValue);
+          setGroupBSize(clampNumber(scaled, 0, 10000));
+          setGroupBSizeSlider(clampNumber(newSliderValue, -100, 100));
         };
 
         const handleGroupARateSliderChange = (event) => {
           const newSliderValue = event.target.valueAsNumber;
-          if (!Number.isFinite(newSliderValue) || newSliderValue <= 0) {
+          if (!Number.isFinite(newSliderValue)) {
             return;
           }
 
-          setGroupARate((prevRate) => {
-            if (!Number.isFinite(prevRate)) {
-              return 0;
-            }
+          const multiplier = sliderToMultiplier(newSliderValue);
+          const baseRate = Number.isFinite(groupARateBase)
+            ? groupARateBase
+            : 0;
+          const scaled = parseFloat((baseRate * multiplier).toFixed(4));
 
-            const safePrevious = groupARateSlider || 1;
-            const scaled = parseFloat(
-              (prevRate * (newSliderValue / safePrevious)).toFixed(4)
-            );
-            return clampNumber(scaled, 0, 1);
-          });
-          setGroupARateSlider(newSliderValue);
+          setGroupARate(clampNumber(scaled, 0, 1));
+          setGroupARateSlider(clampNumber(newSliderValue, -100, 100));
         };
 
         const handleGroupBRateSliderChange = (event) => {
           const newSliderValue = event.target.valueAsNumber;
-          if (!Number.isFinite(newSliderValue) || newSliderValue <= 0) {
+          if (!Number.isFinite(newSliderValue)) {
             return;
           }
 
-          setGroupBRate((prevRate) => {
-            if (!Number.isFinite(prevRate)) {
-              return 0;
-            }
+          const multiplier = sliderToMultiplier(newSliderValue);
+          const baseRate = Number.isFinite(groupBRateBase)
+            ? groupBRateBase
+            : 0;
+          const scaled = parseFloat((baseRate * multiplier).toFixed(4));
 
-            const safePrevious = groupBRateSlider || 1;
-            const scaled = parseFloat(
-              (prevRate * (newSliderValue / safePrevious)).toFixed(4)
-            );
-            return clampNumber(scaled, 0, 1);
-          });
-          setGroupBRateSlider(newSliderValue);
+          setGroupBRate(clampNumber(scaled, 0, 1));
+          setGroupBRateSlider(clampNumber(newSliderValue, -100, 100));
         };
 
         const getInterpretation = () => {
@@ -1080,17 +1101,17 @@
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="range"
-                            min="50"
-                            max="150"
+                            min="-100"
+                            max="100"
                             step="10"
                             value={groupASizeSlider}
                             onChange={handleGroupASizeSliderChange}
                             className="flex-1 accent-[#C28E0E] cursor-pointer"
-                            title="Adjust by 10% increments"
-                            aria-label="Adjust Group A sample size by percentage"
+                            title="Adjust by 10% increments (±100%)"
+                            aria-label="Adjust Group A sample size by percentage change"
                           />
                           <span className="text-xs font-medium text-[#373A36]">
-                            {groupASizeSlider}%
+                            {formatSliderLabel(groupASizeSlider)}
                           </span>
                         </div>
                       </div>
@@ -1110,17 +1131,17 @@
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="range"
-                            min="50"
-                            max="150"
+                            min="-100"
+                            max="100"
                             step="10"
                             value={groupARateSlider}
                             onChange={handleGroupARateSliderChange}
                             className="flex-1 accent-[#C28E0E] cursor-pointer"
-                            title="Adjust by 10% increments"
-                            aria-label="Adjust Group A open rate by percentage"
+                            title="Adjust by 10% increments (±100%)"
+                            aria-label="Adjust Group A open rate by percentage change"
                           />
                           <span className="text-xs font-medium text-[#373A36]">
-                            {groupARateSlider}%
+                            {formatSliderLabel(groupARateSlider)}
                           </span>
                         </div>
                       </div>
@@ -1157,17 +1178,17 @@
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="range"
-                            min="50"
-                            max="150"
+                            min="-100"
+                            max="100"
                             step="10"
                             value={groupBSizeSlider}
                             onChange={handleGroupBSizeSliderChange}
                             className="flex-1 accent-[#C28E0E] cursor-pointer"
-                            title="Adjust by 10% increments"
-                            aria-label="Adjust Group B sample size by percentage"
+                            title="Adjust by 10% increments (±100%)"
+                            aria-label="Adjust Group B sample size by percentage change"
                           />
                           <span className="text-xs font-medium text-[#373A36]">
-                            {groupBSizeSlider}%
+                            {formatSliderLabel(groupBSizeSlider)}
                           </span>
                         </div>
                       </div>
@@ -1187,17 +1208,17 @@
                         <div className="mt-2 flex items-center gap-3">
                           <input
                             type="range"
-                            min="50"
-                            max="150"
+                            min="-100"
+                            max="100"
                             step="10"
                             value={groupBRateSlider}
                             onChange={handleGroupBRateSliderChange}
                             className="flex-1 accent-[#C28E0E] cursor-pointer"
-                            title="Adjust by 10% increments"
-                            aria-label="Adjust Group B open rate by percentage"
+                            title="Adjust by 10% increments (±100%)"
+                            aria-label="Adjust Group B open rate by percentage change"
                           />
                           <span className="text-xs font-medium text-[#373A36]">
-                            {groupBRateSlider}%
+                            {formatSliderLabel(groupBRateSlider)}
                           </span>
                         </div>
                       </div>
