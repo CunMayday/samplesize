@@ -403,6 +403,14 @@
         const [groupBSize, setGroupBSize] = useState(500);
         const [groupARate, setGroupARate] = useState(0.12);
         const [groupBRate, setGroupBRate] = useState(0.15);
+        const [groupASizeSlider, setGroupASizeSlider] = useState(100);
+        const [groupBSizeSlider, setGroupBSizeSlider] = useState(100);
+        const [groupARateSlider, setGroupARateSlider] = useState(100);
+        const [groupBRateSlider, setGroupBRateSlider] = useState(100);
+        const [groupASizeBaseline, setGroupASizeBaseline] = useState(500);
+        const [groupBSizeBaseline, setGroupBSizeBaseline] = useState(500);
+        const [groupARateBaseline, setGroupARateBaseline] = useState(0.12);
+        const [groupBRateBaseline, setGroupBRateBaseline] = useState(0.15);
         const [results, setResults] = useState(null);
 
         const significanceLevel = 0.05;
@@ -624,6 +632,138 @@
           if (pValue < 0.05)
             return "border border-[#CEB888]/70 bg-[#CEB888]/25 text-[#000000]";
           return "border border-[#9D968D]/60 bg-[#9D968D]/20 text-[#373A36]";
+        };
+
+        const clampNumber = (value, min, max) => {
+          if (!Number.isFinite(value)) {
+            return min;
+          }
+          if (!Number.isFinite(min) || !Number.isFinite(max)) {
+            return value;
+          }
+          return Math.min(Math.max(value, min), max);
+        };
+
+        const formatSliderLabel = (value) => {
+          const delta = Math.round(value - 100);
+          const prefix = delta > 0 ? "+" : "";
+          return `${prefix}${delta}%`;
+        };
+
+        const handleGroupASizeInputChange = (event) => {
+          const rawValue = event.target.valueAsNumber;
+          if (Number.isNaN(rawValue)) {
+            setGroupASize(0);
+            setGroupASizeSlider(100);
+            setGroupASizeBaseline(0);
+            return;
+          }
+
+          const sanitizedValue = Math.round(rawValue);
+          const clampedValue = clampNumber(sanitizedValue, 0, 10000);
+          setGroupASize(clampedValue);
+          setGroupASizeSlider(100);
+          setGroupASizeBaseline(clampedValue);
+        };
+
+        const handleGroupBSizeInputChange = (event) => {
+          const rawValue = event.target.valueAsNumber;
+          if (Number.isNaN(rawValue)) {
+            setGroupBSize(0);
+            setGroupBSizeSlider(100);
+            setGroupBSizeBaseline(0);
+            return;
+          }
+
+          const sanitizedValue = Math.round(rawValue);
+          const clampedValue = clampNumber(sanitizedValue, 0, 10000);
+          setGroupBSize(clampedValue);
+          setGroupBSizeSlider(100);
+          setGroupBSizeBaseline(clampedValue);
+        };
+
+        const handleGroupARateInputChange = (event) => {
+          const rawValue = event.target.valueAsNumber;
+          if (Number.isNaN(rawValue)) {
+            setGroupARate(0);
+            setGroupARateSlider(100);
+            setGroupARateBaseline(0);
+            return;
+          }
+
+          const normalized = rawValue / 100;
+          const clampedRate = clampNumber(normalized, 0, 1);
+          setGroupARate(clampedRate);
+          setGroupARateSlider(100);
+          setGroupARateBaseline(clampedRate);
+        };
+
+        const handleGroupBRateInputChange = (event) => {
+          const rawValue = event.target.valueAsNumber;
+          if (Number.isNaN(rawValue)) {
+            setGroupBRate(0);
+            setGroupBRateSlider(100);
+            setGroupBRateBaseline(0);
+            return;
+          }
+
+          const normalized = rawValue / 100;
+          const clampedRate = clampNumber(normalized, 0, 1);
+          setGroupBRate(clampedRate);
+          setGroupBRateSlider(100);
+          setGroupBRateBaseline(clampedRate);
+        };
+
+        const handleGroupASizeSliderChange = (event) => {
+          const newSliderValue = event.target.valueAsNumber;
+          if (!Number.isFinite(newSliderValue) || newSliderValue < 0) {
+            return;
+          }
+
+          const scaled = Math.round(
+            groupASizeBaseline * (newSliderValue / 100)
+          );
+          setGroupASize(clampNumber(scaled, 0, 10000));
+          setGroupASizeSlider(newSliderValue);
+        };
+
+        const handleGroupBSizeSliderChange = (event) => {
+          const newSliderValue = event.target.valueAsNumber;
+          if (!Number.isFinite(newSliderValue) || newSliderValue < 0) {
+            return;
+          }
+
+          const scaled = Math.round(
+            groupBSizeBaseline * (newSliderValue / 100)
+          );
+          setGroupBSize(clampNumber(scaled, 0, 10000));
+          setGroupBSizeSlider(newSliderValue);
+        };
+
+        const handleGroupARateSliderChange = (event) => {
+          const newSliderValue = event.target.valueAsNumber;
+          if (!Number.isFinite(newSliderValue) || newSliderValue < 0) {
+            return;
+          }
+
+          const scaled = parseFloat(
+            (groupARateBaseline * (newSliderValue / 100)).toFixed(4)
+          );
+          setGroupARate(clampNumber(scaled, 0, 1));
+          setGroupARateSlider(newSliderValue);
+        };
+
+        const handleGroupBRateSliderChange = (event) => {
+          const newSliderValue = event.target.valueAsNumber;
+          if (!Number.isFinite(newSliderValue) || newSliderValue < 0) {
+            return;
+          }
+
+          const scaled = parseFloat(
+            (groupBRateBaseline * (newSliderValue / 100)).toFixed(4)
+          );
+          setGroupBRate(clampNumber(scaled, 0, 1));
+          setGroupBRateSlider(newSliderValue);
         };
 
         const getInterpretation = () => {
@@ -917,112 +1057,186 @@
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="space-y-6">
-                <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
-                    Group A: {scenarioDetails.groupALabel}
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#373A36] mb-2">
-                        Sample Size
-                      </label>
-                      <input
-                        type="number"
-                        value={groupASize}
-                        onChange={(e) =>
-                          setGroupASize(
-                            parseInt(e.target.value, 10) || 0
-                          )
-                        }
-                        min="50"
-                        max="10000"
-                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
-                      />
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                    <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                      Group A: {scenarioDetails.groupALabel}
+                    </h2>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#373A36] mb-2">
+                          Sample Size
+                        </label>
+                        <input
+                          type="number"
+                          value={groupASize}
+                          onChange={handleGroupASizeInputChange}
+                          min="50"
+                          max="10000"
+                          className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                        />
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            step="10"
+                            value={groupASizeSlider}
+                            onChange={handleGroupASizeSliderChange}
+                            className="flex-1 accent-[#C28E0E] cursor-pointer"
+                            title="Adjust by ±10% increments"
+                            aria-label="Adjust Group A sample size by percentage (-100% to +100%)"
+                          />
+                          <span className="text-xs font-medium text-[#373A36]">
+                            {formatSliderLabel(groupASizeSlider)}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-[#373A36] mb-2">
+                          {scenarioDetails.metric} (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={(groupARate * 100).toFixed(1)}
+                          onChange={handleGroupARateInputChange}
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                        />
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            step="10"
+                            value={groupARateSlider}
+                            onChange={handleGroupARateSliderChange}
+                            className="flex-1 accent-[#C28E0E] cursor-pointer"
+                            title="Adjust by ±10% increments"
+                            aria-label="Adjust Group A open rate by percentage (-100% to +100%)"
+                          />
+                          <span className="text-xs font-medium text-[#373A36]">
+                            {formatSliderLabel(groupARateSlider)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="bg-[#CEB888]/20 p-3 rounded">
+                        <p className="text-sm text-[#373A36]">
+                          <strong>Conversions:</strong>{" "}
+                          {Math.round(groupASize * groupARate)} out of{" "}
+                          {groupASize}
+                        </p>
+                        <p className="text-sm text-[#373A36]">
+                          <strong>Rate:</strong>{" "}
+                          {(groupARate * 100).toFixed(2)}%
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#373A36] mb-2">
-                        {scenarioDetails.metric} (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={(groupARate * 100).toFixed(1)}
-                        onChange={(e) =>
-                          setGroupARate(
-                            parseFloat(e.target.value) / 100 || 0
-                          )
-                        }
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
-                      />
-                    </div>
-                    <div className="bg-[#CEB888]/20 p-3 rounded">
-                      <p className="text-sm text-[#373A36]">
-                        <strong>Conversions:</strong>{" "}
-                        {Math.round(groupASize * groupARate)} out of{" "}
-                        {groupASize}
-                      </p>
-                      <p className="text-sm text-[#373A36]">
-                        <strong>Rate:</strong>{" "}
-                        {(groupARate * 100).toFixed(2)}%
-                      </p>
+                  </div>
+                  <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
+                    <h2 className="text-xl font-semibold mb-4 text-[#000000]">
+                      Group B: {scenarioDetails.groupBLabel}
+                    </h2>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#373A36] mb-2">
+                          Sample Size
+                        </label>
+                        <input
+                          type="number"
+                          value={groupBSize}
+                          onChange={handleGroupBSizeInputChange}
+                          min="50"
+                          max="10000"
+                          className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                        />
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            step="10"
+                            value={groupBSizeSlider}
+                            onChange={handleGroupBSizeSliderChange}
+                            className="flex-1 accent-[#C28E0E] cursor-pointer"
+                            title="Adjust by ±10% increments"
+                            aria-label="Adjust Group B sample size by percentage (-100% to +100%)"
+                          />
+                          <span className="text-xs font-medium text-[#373A36]">
+                            {formatSliderLabel(groupBSizeSlider)}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-[#373A36] mb-2">
+                          {scenarioDetails.metric} (%)
+                        </label>
+                        <input
+                          type="number"
+                          value={(groupBRate * 100).toFixed(1)}
+                          onChange={handleGroupBRateInputChange}
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
+                        />
+                        <div className="mt-2 flex items-center gap-3">
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            step="10"
+                            value={groupBRateSlider}
+                            onChange={handleGroupBRateSliderChange}
+                            className="flex-1 accent-[#C28E0E] cursor-pointer"
+                            title="Adjust by ±10% increments"
+                            aria-label="Adjust Group B open rate by percentage (-100% to +100%)"
+                          />
+                          <span className="text-xs font-medium text-[#373A36]">
+                            {formatSliderLabel(groupBRateSlider)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="bg-[#C28E0E]/15 p-3 rounded">
+                        <p className="text-sm text-[#373A36]">
+                          <strong>Conversions:</strong>{" "}
+                          {Math.round(groupBSize * groupBRate)} out of{" "}
+                          {groupBSize}
+                        </p>
+                        <p className="text-sm text-[#373A36]">
+                          <strong>Rate:</strong>{" "}
+                          {(groupBRate * 100).toFixed(2)}%
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-[#000000]">
-                    Group B: {scenarioDetails.groupBLabel}
-                  </h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-[#373A36] mb-2">
-                        Sample Size
-                      </label>
-                      <input
-                        type="number"
-                        value={groupBSize}
-                        onChange={(e) =>
-                          setGroupBSize(
-                            parseInt(e.target.value, 10) || 0
-                          )
-                        }
-                        min="50"
-                        max="10000"
-                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#373A36] mb-2">
-                        {scenarioDetails.metric} (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={(groupBRate * 100).toFixed(1)}
-                        onChange={(e) =>
-                          setGroupBRate(
-                            parseFloat(e.target.value) / 100 || 0
-                          )
-                        }
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        className="w-full p-3 border border-[#9D968D]/60 rounded-md focus:ring-2 focus:ring-[#C28E0E]"
-                      />
-                    </div>
-                    <div className="bg-[#C28E0E]/15 p-3 rounded">
-                      <p className="text-sm text-[#373A36]">
-                        <strong>Conversions:</strong>{" "}
-                        {Math.round(groupBSize * groupBRate)} out of{" "}
-                        {groupBSize}
-                      </p>
-                      <p className="text-sm text-[#373A36]">
-                        <strong>Rate:</strong>{" "}
-                        {(groupBRate * 100).toFixed(2)}%
-                      </p>
-                    </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-xl font-semibold text-[#000000]">
+                      Conversion Lift Over Sample Size
+                    </h2>
+                    <p className="text-xs uppercase tracking-wide text-[#6B7280]">
+                      95% confidence intervals
+                    </p>
                   </div>
+                  <p className="text-sm text-[#373A36] mt-2 mb-4">
+                    Suggestion 1 maps to the paired lines that track each group's conversion rate
+                    as sample size increases, while suggestion 2 is represented by the shaded
+                    confidence bands that contract with larger samples. Each point applies the current
+                    rates to proportionally scaled sample sizes for Groups A and B.
+                  </p>
+                  <ConversionLiftChart
+                    series={sampleProjectionSeries}
+                    groupALabel={scenarioDetails.groupALabel}
+                    groupBLabel={scenarioDetails.groupBLabel}
+                  />
+                  <p className="text-xs text-[#6B7280] mt-3">
+                    Confidence intervals use a normal approximation and assume the same observed rates while sample sizes scale.
+                  </p>
                 </div>
 
                 <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
@@ -1115,31 +1329,6 @@
                           </p>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 className="text-xl font-semibold text-[#000000]">
-                          Conversion Lift Over Sample Size
-                        </h2>
-                        <p className="text-xs uppercase tracking-wide text-[#6B7280]">
-                          95% confidence intervals
-                        </p>
-                      </div>
-                      <p className="text-sm text-[#373A36] mt-2 mb-4">
-                        Suggestion 1 maps to the paired lines that track each group&apos;s conversion rate
-                        as sample size increases, while suggestion 2 is represented by the shaded
-                        confidence bands that contract with larger samples. Each point applies the current
-                        rates to proportionally scaled sample sizes for Groups A and B.
-                      </p>
-                      <ConversionLiftChart
-                        series={sampleProjectionSeries}
-                        groupALabel={scenarioDetails.groupALabel}
-                        groupBLabel={scenarioDetails.groupBLabel}
-                      />
-                      <p className="text-xs text-[#6B7280] mt-3">
-                        Confidence intervals use a normal approximation and assume the same observed rates while sample sizes scale.
-                      </p>
                     </div>
 
                     <div className="bg-white border border-[#9D968D]/40 rounded-lg shadow-sm p-6">
